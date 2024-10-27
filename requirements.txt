@@ -1,0 +1,14 @@
+click==8.1.7
+defusedxml==0.7.1
+googletrans==3.1.0a0
+inflect==7.4.0
+joblib==1.4.2
+mlconjug3==3.11.0
+pandas==2.2.3
+pypdf==5.0.1
+pyyaml==6.0.2
+rich==13.9.3
+scikit-learn==1.5.2
+setuptools==75.2.0
+tabula-py==2.10.0
+tomlkit==0.13.2
