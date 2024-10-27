@@ -229,6 +229,7 @@ def translate(
     df: pd.DataFrame,
     dst: str,
     src: str = "en",
+    limit: Optional[int] = None,
     prepend_articles: bool = True,
     check_noun_plurals: bool = True,
     check_irregular_verbs: bool = False,
@@ -264,7 +265,7 @@ def translate(
     translated = []
     total = len(df)
     for i, row in df.iterrows():
-        if i > 250:
+        if limit and i > limit:
             break
         try:
             translation = _impl(row)
@@ -280,12 +281,13 @@ def translate(
 if __name__ == "__main__":
 
     parser = ArgumentParser(description="Convert Oxford PDF vocab list to CSV and add translations")
-    parser.add_argument("-p", "--pdf_path", type=str, required=True, help="Path to downloaded PDF")
     parser.add_argument("-d", "--dst", type=str, required=True, help="Target language")
+    parser.add_argument("-p", "--pdf_path", type=str, required=True, help="Path to downloaded PDF")
+    parser.add_argument("-l", "--limit", action="store_true", help="Limit the number of rows translated")
     args = parser.parse_args()
 
     lines = parse_oxford_pdf(args.pdf_path)
     df = extract_oxford_df(lines)
-    output = translate(df, args.dst)
+    output = translate(df, args.dst, limit=args.limit)
     base_file = "".join(args.pdf_path.split(".")[:-1])
     output.to_csv(base_file + ".csv", index=False)
