@@ -275,6 +275,7 @@ def translate(
         translated.append(translation)
         print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
     df[dst] = translated + [None] * (len(df) - len(translated))
+    df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
     return df
 
 
