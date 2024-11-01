@@ -230,7 +230,7 @@ def translate(
     dst: str,
     src: str = "en",
     limit: Optional[int] = None,
-    prepend_articles: bool = True,
+    noun_article: Optional[str] = "the",
     check_noun_plurals: bool = True,
     check_irregular_verbs: bool = False,
 ) -> pd.DataFrame:
@@ -241,8 +241,8 @@ def translate(
     def _impl(row):
         text = row.en
         if row.pos == PartOfSpeech.NOUN:
-            if prepend_articles:
-                text = "the " + text
+            if noun_article:
+                text = f"{noun_article} {text}"
             translation = _translate(text)
             if check_noun_plurals:
                 plural = _translate(pluralize(text))
