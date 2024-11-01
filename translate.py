@@ -282,7 +282,7 @@ if __name__ == "__main__":
 
     parser = ArgumentParser(description="Convert Oxford PDF vocab list to CSV and add translations")
     parser.add_argument("-d", "--dst", type=str, required=True, help="Target language")
-    parser.add_argument("-l", "--limit", action="store_true", help="Limit the number of rows translated")
+    parser.add_argument("-l", "--limit", type=int, help="Limit the number of rows translated")
     parser.add_argument("-p", "--pdf_path", type=str, required=True, help="Path to downloaded PDF")
     parser.add_argument("-s", "--split", type=str, choices=("level", "pos"), help="Save separate CSVs")
     args = parser.parse_args()
