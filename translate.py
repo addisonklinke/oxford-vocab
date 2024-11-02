@@ -1,3 +1,4 @@
+from abc import ABC
 from argparse import ArgumentParser
 from enum import StrEnum
 from functools import partial
@@ -12,8 +13,158 @@ import pandas as pd
 from pypdf import PdfReader
 
 
-conjugator = Conjugator(language="en")
+conjugator = Conjugator(language="en")  # TODO silence sklearn pickle warnings
 translator = Translator()
+
+
+class Language(ABC):
+
+    name: str
+
+    def conjugate(
+        self,
+        infinitive: str,
+        mood: str = "indicative",
+        tense: str = "present",
+        person: str = "he/she/it"
+    ) -> str:
+        if self.name != "en":
+            # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
+            raise NotImplementedError(f"Not setup to parse tenses of lang={self.name}")
+        verb = conjugator.conjugate(infinitive)
+        return verb[mood][tense][person]  # May raise KeyError for invalid parameters
+
+    def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
+        raise NotImplementedError
+
+    def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
+        raise NotImplementedError
+
+    def pluralize(self, noun: str) -> str:
+        if self.name != "en":
+            raise NotImplementedError(f"Not setup to pluralize lang={self.name}")
+        engine = inflect.engine()
+        return engine.plural_noun(noun)
+
+    def translate(self, text: str, dst: str) -> str:
+        return translator.translate(text, src=self.name, dest=dst).text
+
+
+class English(Language):
+    name = "en"
+
+
+class German(Language):
+
+    name = "de"
+
+    # https://coffeebreaklanguages.com/2024/06/making-sense-of-german-separable-verbs-a-guide-for-learners/
+    separable_prefixes = (
+        "ab",
+        "an",
+        "auf",
+        "aus",
+        "ein",
+        "mit",
+        "nach",
+        "vor",
+        "zu",
+    )
+    inseparable_prefixes = (
+        "be",
+        "emp",
+        "ent",
+        "er",
+        "ver",
+        "zer",
+    )
+
+    def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
+
+        # Get the reference conjugations in English
+        en = English()
+        _translate = partial(en.translate, dst="de")
+        kwargs = {
+            "infinitive": infinitive_en,
+            "mood": "indicative",
+            "person": "he/she/it"
+        }
+        present = en.conjugate(tense="indicative present", **kwargs)
+        simple_past = en.conjugate(tense="indicative past tense", **kwargs)
+        perfect = en.conjugate(tense="indicative present perfect", **kwargs)
+
+        # Convert to German
+        # Add the explicit subject pronoun to avoid ambiguity
+        present_de = _translate("he " + present).lower().replace("er ", "")
+        simple_past_de = _translate("he " + simple_past).lower().replace(
+            "er ", "")  # FIXME returning perfekt instead of simple past
+        perfect_de = _translate(
+            "he had " + perfect  # Force had to get perfekt construction
+        ).lower().replace(
+            "hatte", "hat"  # Google may think it's past perfekt
+        ).replace(
+            "war", "ist"
+        ).split()[-1]  # Just interested in the gerund
+
+        # Determine whether they're irregular
+        for prefix in self.separable_prefixes:
+            if infinitive_native.startswith(prefix):
+                stem = infinitive_native.replace(prefix, "")
+                break
+        else:
+            stem = infinitive_native
+            prefix = ""
+
+        # TODO override `conjugate` method with this basic logic
+        perfekt_ge = "" if any(stem.startswith(p) for p in self.inseparable_prefixes) else "ge"
+        stem = stem.replace("en", "")
+        present_expected = f"{stem}t {prefix}".strip()
+        simple_past_expected = f"{stem}te {prefix}".strip()
+        perfect_expected = f"{prefix}{perfekt_ge}{stem}t"
+        simple_past_is_perfekt = "hat" in simple_past_de or "ist" in simple_past_de  # Ignore buggy Google translate
+        tense_is_regular = [
+            present_de == present_expected,
+            simple_past_de == simple_past_expected or simple_past_is_perfekt,
+            perfect_de == perfect_expected,  # Don't worry about sein vs. haben auxiliary verb
+        ]
+        note = ""
+        for is_regular, conjugated in zip(tense_is_regular, [present_de, simple_past_de, perfect_de]):
+            note += f"{conjugated if not is_regular else '_'}, "
+        if not len(re.sub("[_,\\s]+", "", note)):
+            note = None
+        else:
+            note = note[:-2]
+        return note
+
+    def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
+        if len(plural.split()) != 2:
+            print(f"Expected 2 words in German plural, got {plural}")
+            return None
+        article, plural_noun = plural.split()
+        if article != "die":
+            print(f"Plural German article should always be `die`, got {plural}")
+            return None
+        singular_noun = singular.split()[-1]
+        if singular_noun in plural_noun:
+            ending = plural_noun.replace(singular_noun, "-")
+        else:
+            plural_noun_no_umlauts = self.remove_umlauts(plural_noun)
+            if singular_noun in plural_noun_no_umlauts:
+                ending = plural_noun_no_umlauts.replace(singular_noun, "")
+                ending = "-̈" + ending
+            else:
+                print(f"Failed to find plural ending for {singular} -> {plural}")
+                ending = None
+        return ending
+
+    @staticmethod
+    def remove_umlauts(de_text: str) -> str:
+        replacements = {
+            "ä": "a",
+            "ö": "o",
+            "ü": "u",
+        }
+        return "".join([replacements.get(c, c) for c in de_text])
 
 
 class OxfordPdf:
@@ -103,135 +254,6 @@ class PartOfSpeech(StrEnum):
     ADJECTIVE = "adj"
     ADVERB = "adv"
     CONJUNCTION = "conj"
-
-
-def conjugate_verb(infinitive: str, lang: str, mood: str, tense: str, person: str) -> Optional[str]:
-    if lang != "en":
-        # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
-        raise NotImplementedError(f"Not setup to parse tenses of lang={lang}")
-    verb = conjugator.conjugate(infinitive)
-    return verb[mood][tense][person]
-
-
-def extract_plural_ending(singular: str, plural: str, lang: str) -> Optional[str]:
-    if lang == "de":
-        if len(plural.split()) != 2:
-            print(f"Expected 2 words in German plural, got {plural}")
-            return None
-        article, plural_noun = plural.split()
-        if article != "die":
-            print(f"Plural German article should always be `die`, got {plural}")
-            return None
-        singular_noun = singular.split()[-1]
-        if singular_noun in plural_noun:
-            ending = plural_noun.replace(singular_noun, "-")
-        else:
-            plural_noun_no_umlauts = remove_umlauts(plural_noun)
-            if singular_noun in plural_noun_no_umlauts:
-                ending = plural_noun_no_umlauts.replace(singular_noun, "")
-                ending = "-̈" + ending
-            else:
-                print(f"Failed to find plural ending for {singular} -> {plural}")
-                ending = None
-    else:
-        raise NotImplementedError(f"Unknown language {lang}")
-    return ending
-
-
-def extract_irregular_verb_forms(infinitive_en: str, infinitive_native: str, lang: str) -> Optional[str]:
-    if lang == "de":
-
-        # Get the reference conjugations in English
-        _translate = partial(translate_str, src="en", dst="de")
-        kwargs = {
-            "infinitive": infinitive_en,
-            "lang": "en",
-            "mood": "indicative",
-            "person": "he/she/it"
-        }
-        present = conjugate_verb(tense="indicative present", **kwargs)
-        simple_past = conjugate_verb(tense="indicative past tense", **kwargs)
-        perfect = conjugate_verb(tense="indicative present perfect", **kwargs)
-
-        # Convert to German
-        # Add the explicit subject pronoun to avoid ambiguity
-        present_de = _translate("he " + present).lower().replace("er ", "")
-        simple_past_de = _translate("he " + simple_past).lower().replace("er ", "")  # FIXME returning perfekt instead of simple past
-        perfect_de = _translate(
-            "he had " + perfect  # Force had to get perfekt construction
-        ).lower().replace(
-            "hatte", "hat"  # Google may think it's past perfekt
-        ).replace(
-            "war", "ist"
-        ).split()[-1]  # Just interested in the gerund
-
-        # Determine whether they're irregular
-        # https://coffeebreaklanguages.com/2024/06/making-sense-of-german-separable-verbs-a-guide-for-learners/
-        separable_prefixes = (
-            "ab",
-            "an",
-            "auf",
-            "aus",
-            "ein",
-            "mit",
-            "nach",
-            "vor",
-            "zu",
-        )
-        inseparable_prefixes = (
-            "be",
-            "emp",
-            "ent",
-            "er",
-            "ver",
-            "zer",
-        )
-        for prefix in separable_prefixes:
-            if infinitive_native.startswith(prefix):
-                stem = infinitive_native.replace(prefix, "")
-                break
-        else:
-            stem = infinitive_native
-            prefix = ""
-        perfekt_ge = "" if any(stem.startswith(p) for p in inseparable_prefixes) else "ge"
-        stem = stem.replace("en", "")
-        present_expected = f"{stem}t {prefix}".strip()
-        simple_past_expected = f"{stem}te {prefix}".strip()
-        perfect_expected = f"{prefix}{perfekt_ge}{stem}t"
-        simple_past_is_perfekt = "hat" in simple_past_de or "ist" in simple_past_de  # Ignore buggy Google translate
-        tense_is_regular = [
-            present_de == present_expected,
-            simple_past_de == simple_past_expected or simple_past_is_perfekt,
-            perfect_de == perfect_expected,  # Don't worry about sein vs. haben auxiliary verb
-        ]
-        note = ""
-        for is_regular, conjugated in zip(tense_is_regular, [present_de, simple_past_de, perfect_de]):
-            note += f"{conjugated if not is_regular else '_'}, "
-        if not len(re.sub("[_,\\s]+", "", note)):
-            note = None
-        else:
-            note = note[:-2]
-    else:
-        raise NotImplementedError(f"Unknown language {lang}")
-    return note
-
-
-def pluralize(noun):
-    engine = inflect.engine()
-    return engine.plural_noun(noun)
-
-
-def remove_umlauts(de_text: str) -> str:
-    replacements = {
-        "ä": "a",
-        "ö": "o",
-        "ü": "u",
-    }
-    return "".join([replacements.get(c, c) for c in de_text])
-
-
-def translate_str(text: str, src: str, dst: str) -> str:
-    return translator.translate(text, src=src, dest=dst).text
 
 
 def translate(
