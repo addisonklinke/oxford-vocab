@@ -16,6 +16,87 @@ conjugator = Conjugator(language="en")
 translator = Translator()
 
 
+class OxfordPdf:
+    """Parse Oxford vocab list PDFs into tabular format"""
+
+    def __init__(self, pdf_path: str):
+        self.lines = self.parse(pdf_path)
+
+    @staticmethod
+    def parse(pdf_path: str) -> List[str]:
+        """Convert raw PDF text into word entries"""
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
+        text = re.sub("(?<=[a-z])\n[0-9]", "", text)  # Strip superscript that marauds as difficulty number
+        # TODO check if multi-word entries are extracted correctly, i.e. `ice cream`
+        entry_regex = re.compile(
+            # TODO handle proper nouns like month names
+            "[a-z]+\\s"  # English word is always lowercase
+            "[nvadjco"  # Letter abbreviations for POS
+            "ACB12,.\\s]+"  # Might have separate difficulty ratings for different POS
+            "\\.\\s"  # But this middle section always ends in a period 
+            "[ABC][12]"  # The last (typically only) difficulty rating
+        )
+        return re.findall(entry_regex, text)
+
+    def to_df(self) -> pd.DataFrame:
+        """Parse each entry string into a tabular row"""
+        rows = []
+        for line in self.lines:
+            # TODO handle `modal` and `auxiliary` annotations in italics
+            # TODO conditional lowercase depending on language (i.e. non-nouns in German) and proper nouns
+            parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
+            if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
+                # Multiple difficulty ratings, implying multiple POS as well
+                if len(parts) != 5:
+                    print(f"Expected 5 parts, got {parts}")
+                    continue
+                word, pos1, level1, pos2, level2 = parts
+                rows.extend([
+                    [
+                        word,
+                        pos1,
+                        level1,
+                    ],
+                    [
+                        word,
+                        pos2,
+                        level2,
+                    ]
+                ])
+            elif line.count(".") > 1:
+                # Multiple POS, all the same difficulty
+                if len(parts) < 4:
+                    print(f"Expected at least 4 parts, got {parts}")
+                    continue
+                word = parts[0]
+                poss = parts[1:-1]
+                level = parts[-1]
+                rows.extend([
+                    [
+                        word,
+                        pos,
+                        level,
+                    ]
+                    for pos in poss
+                ])
+            else:
+                # Standard format: one POS and one difficulty
+                if len(parts) != 3:
+                    print(f"Expected 3 parts, got {parts}")
+                    continue
+                word, pos, level = parts
+                rows.append([
+                    word,
+                    pos,
+                    level,
+                ])
+        return pd.DataFrame(rows, columns=["en", "pos", "level"])
+
+
 class PartOfSpeech(StrEnum):
     NOUN = "n"
     VERB = "v"
@@ -30,62 +111,6 @@ def conjugate_verb(infinitive: str, lang: str, mood: str, tense: str, person: st
         raise NotImplementedError(f"Not setup to parse tenses of lang={lang}")
     verb = conjugator.conjugate(infinitive)
     return verb[mood][tense][person]
-
-
-def extract_oxford_df(lines: List[str]) -> pd.DataFrame:
-    """Parse each entry string into a tabular row"""
-    rows = []
-    for line in lines:
-        # TODO handle `modal` and `auxiliary` annotations in italics
-        # TODO conditional lowercase depending on language (i.e. non-nouns in German) and proper nouns
-        parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
-        if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
-            # Multiple difficulty ratings, implying multiple POS as well
-            if len(parts) != 5:
-                print(f"Expected 5 parts, got {parts}")
-                continue
-            word, pos1, level1, pos2, level2 = parts
-            rows.extend([
-                [
-                    word,
-                    pos1,
-                    level1,
-                ],
-                [
-                    word,
-                    pos2,
-                    level2,
-                ]
-            ])
-        elif line.count(".") > 1:
-            # Multiple POS, all the same difficulty
-            if len(parts) < 4:
-                print(f"Expected at least 4 parts, got {parts}")
-                continue
-            word = parts[0]
-            poss = parts[1:-1]
-            level = parts[-1]
-            rows.extend([
-                [
-                    word,
-                    pos,
-                    level,
-                ]
-                for pos in poss
-            ])
-        else:
-            # Standard format: one POS and one difficulty
-            if len(parts) != 3:
-                print(f"Expected 3 parts, got {parts}")
-                continue
-            word, pos, level = parts
-            rows.append([
-                word,
-                pos,
-                level,
-            ])
-
-    return pd.DataFrame(rows, columns=["en", "pos", "level"])
 
 
 def extract_plural_ending(singular: str, plural: str, lang: str) -> Optional[str]:
@@ -189,26 +214,6 @@ def extract_irregular_verb_forms(infinitive_en: str, infinitive_native: str, lan
     else:
         raise NotImplementedError(f"Unknown language {lang}")
     return note
-
-
-def parse_oxford_pdf(pdf_path: str) -> List[str]:
-    """Convert raw PDF text into word entries"""
-    reader = PdfReader(pdf_path)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-    text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
-    text = re.sub("(?<=[a-z])\n[0-9]", "", text)  # Strip superscript that marauds as difficulty number
-    # TODO check if multi-word entries are extracted correctly, i.e. `ice cream`
-    entry_regex = re.compile(
-        # TODO handle proper nouns like month names
-        "[a-z]+\\s"     # English word is always lowercase
-        "[nvadjco"      # Letter abbreviations for POS
-        "ACB12,.\\s]+"  # Might have separate difficulty ratings for different POS
-        "\\.\\s"        # But this middle section always ends in a period 
-        "[ABC][12]"     # The last (typically only) difficulty rating
-    )
-    return re.findall(entry_regex, text)
 
 
 def pluralize(noun):
