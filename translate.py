@@ -36,6 +36,8 @@ def extract_oxford_df(lines: List[str]) -> pd.DataFrame:
     """Parse each entry string into a tabular row"""
     rows = []
     for line in lines:
+        # TODO handle `modal` and `auxiliary` annotations in italics
+        # TODO conditional lowercase depending on language (i.e. non-nouns in German) and proper nouns
         parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
         if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
             # Multiple difficulty ratings, implying multiple POS as well
@@ -197,7 +199,9 @@ def parse_oxford_pdf(pdf_path: str) -> List[str]:
         text += page.extract_text()
     text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
     text = re.sub("(?<=[a-z])\n[0-9]", "", text)  # Strip superscript that marauds as difficulty number
+    # TODO check if multi-word entries are extracted correctly, i.e. `ice cream`
     entry_regex = re.compile(
+        # TODO handle proper nouns like month names
         "[a-z]+\\s"     # English word is always lowercase
         "[nvadjco"      # Letter abbreviations for POS
         "ACB12,.\\s]+"  # Might have separate difficulty ratings for different POS
@@ -241,6 +245,7 @@ def translate(
     def _impl(row):
         text = row.en
         if row.pos == PartOfSpeech.NOUN:
+            # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
             if noun_article:
                 text = f"{noun_article} {text}"
             translation = _translate(text)
@@ -274,8 +279,16 @@ def translate(
             translation = None
         translated.append(translation)
         print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
+    # TODO dedupe words, `fast` definitely appears in A1 list several times
+    #  due to multiple POS. It's okay if they have different translations
+    #  but in this case everything is `schnell` so it's a waste
+    #  Also cardinal directions are 4x repeat, but articles are slightly different so they'd need to be grouped
+    #  Probably something like df.groupby("en").dedupe(...) and look for x% overlapping characters
     df[dst] = translated + [None] * (len(df) - len(translated))
     df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
+
+    # TODO maybe helpful to print words that are different in English but received the same translation?
+    #  Example: carry and wear both map to tragen
     return df
 
 
@@ -288,6 +301,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--split", type=str, choices=("level", "pos"), help="Save separate CSVs")
     args = parser.parse_args()
 
+    # TODO report percent success rate at each step (PDF to text, text to table, table to translation)
     lines = parse_oxford_pdf(args.pdf_path)
     df = extract_oxford_df(lines)
     output = translate(df, args.dst, limit=args.limit)
