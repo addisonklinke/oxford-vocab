@@ -8,6 +8,7 @@ import warnings
 
 import inflect
 from googletrans import Translator
+import mlconjug3
 from mlconjug3 import Conjugator
 import pandas as pd
 from pypdf import PdfReader
@@ -27,14 +28,14 @@ class Language:
     def conjugate(
         self,
         infinitive: str,
-        mood: str = "indicative",
-        tense: str = "present",
-        person: str = "he/she/it"
+        mood: str,
+        tense: str,
+        person: str
     ) -> str:
         """Return verb's conjugation in this language"""
-        if self.name != "en":
+        if self.name not in mlconjug3.LANGUAGES:
             # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
-            raise NotImplementedError(f"Not setup to parse tenses of lang={self.name}")
+            raise NotImplementedError(f"Language {self.name} not supported by mlconjug3")
         verb = conjugator.conjugate(infinitive)
         return verb[mood][tense][person]  # May raise KeyError for invalid parameters
 
@@ -95,6 +96,16 @@ class Language:
 
 class English(Language):
     name = "en"
+
+    def conjugate(
+        self,
+        infinitive: str,
+        mood: str = "indicative",
+        tense: str = "present",
+        person: str = "he/she/it"
+    ) -> str:
+        """Set default to present tense 3rd person singular"""
+        return super().conjugate(infinitive, mood, tense, person)
 
     def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
         return english
