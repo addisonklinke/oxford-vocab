@@ -249,10 +249,9 @@ class OxfordPdf:
             text += page.extract_text()
         text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
         text = re.sub("(?<=[a-z])\n[0-9]", "", text)  # Strip superscript that marauds as difficulty number
-        # TODO check if multi-word entries are extracted correctly, i.e. `ice cream`
         entry_regex = re.compile(
             # TODO handle proper nouns like month names
-            "[a-z]+\\s"  # English word is always lowercase
+            "[a-z\\s]+\\s"  # English word is always lowercase
             "[nvadjco"  # Letter abbreviations for POS
             "ACB12,.\\s]+"  # Might have separate difficulty ratings for different POS
             "\\.\\s"  # But this middle section always ends in a period 
