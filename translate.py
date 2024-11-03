@@ -4,15 +4,18 @@ from functools import partial
 import re
 import string
 from typing import List, Optional
+import warnings
 
 import inflect
 from googletrans import Translator
 from mlconjug3 import Conjugator
 import pandas as pd
 from pypdf import PdfReader
+from sklearn.base import InconsistentVersionWarning
 
 
-conjugator = Conjugator(language="en")  # TODO silence sklearn pickle warnings
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+conjugator = Conjugator(language="en")
 translator = Translator()
 
 
