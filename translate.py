@@ -243,12 +243,19 @@ class OxfordPdf:
     @staticmethod
     def parse(pdf_path: str) -> List[str]:
         """Convert raw PDF text into word entries"""
+
+        # Get the entire document as one string
         reader = PdfReader(pdf_path)
         text = ""
         for page in reader.pages:
             text += page.extract_text()
+
+        # Preprocessing cleanup
         text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
         text = re.sub("(?<=[a-z])\n?[0-9]", "", text)  # Strip superscript that marauds as difficulty number
+        text = text.replace("auxiliary", "").replace("modal", "")  # Italic annotations
+
+        # Extract individual entries from the vocabulary list
         entry_regex = re.compile(
             "[a-zA-Z\\s]+\\s"  # English word (could contain space or be proper noun)
             "[nvadjco"  # Letter abbreviations for POS
@@ -262,7 +269,6 @@ class OxfordPdf:
         """Parse each entry string into a tabular row"""
         rows = []
         for line in self.lines:
-            # TODO handle `modal` and `auxiliary` annotations in italics
             # TODO conditional lowercase depending on language (i.e. non-nouns in German) and proper nouns
             parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
             if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
