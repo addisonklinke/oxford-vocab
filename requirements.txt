@@ -10,5 +10,6 @@ pyyaml==6.0.2
 rich==13.9.3
 scikit-learn==1.5.2
 setuptools==75.2.0
+spacy==3.8.2
 tabula-py==2.10.0
 tomlkit==0.13.2

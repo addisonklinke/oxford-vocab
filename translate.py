@@ -13,11 +13,16 @@ from mlconjug3 import Conjugator
 import pandas as pd
 from pypdf import PdfReader
 from sklearn.base import InconsistentVersionWarning
+import spacy
 
 
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 conjugator = Conjugator(language="en")
 translator = Translator()
+try:
+    nlp = spacy.load("en_core_web_trf")  # Recommended for best accuracy by https://spacy.io/models
+except OSError as exc:
+    raise RuntimeError("Missing spaCy model: run `python -m spacy download <model_name>` to fix") from exc
 
 
 class Language:
@@ -62,6 +67,10 @@ class Language:
             translation = translation + "[" + note + "]"
         return translation
 
+    @staticmethod
+    def conditionally_case(text: str) -> str:
+        raise NotImplementedError
+
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
         """Subclasses can define language specific behavior. None tells consumers to ignore"""
         return None
@@ -95,6 +104,8 @@ class Language:
 
 
 class English(Language):
+    """Support for several extra operations coming from English-only NLP libraries"""
+
     name = "en"
 
     def conjugate(
@@ -109,6 +120,30 @@ class English(Language):
 
     def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
         return english
+
+    @staticmethod
+    def conditionally_case(text: str) -> str:
+        """Adjust casing so only proper nouns are capitalized
+
+        From discussion here: https://stackoverflow.com/a/63382009/7446465
+        Sounds like NLTK only works well when capitalization already follows convention
+        """
+        # TODO spacy actually supports a lot of non-English languages so this could be upstreamed into the base class
+        #  Just need to map `self.name` to the right NLP model to load
+        # TODO handle start of sentence capitalization and first person pronouns
+        doc = nlp(text.lower())
+        fixed = []
+        for i, tok in enumerate(doc):
+            if (
+                i + 1 == len(doc)
+                or i < len(doc) - 1 and doc[i + 1].pos_ == "PUNCT"
+            ):
+                delimeter = ""
+            else:
+                delimeter = " "
+            token = tok.text.capitalize() if tok.pos_ == "PROPN" else tok.text
+            fixed.append(token + delimeter)
+        return "".join(fixed)
 
 
 class French(Language):
@@ -269,7 +304,7 @@ class OxfordPdf:
         """Parse each entry string into a tabular row"""
         rows = []
         for line in self.lines:
-            # TODO conditional lowercase depending on language (i.e. non-nouns in German) and proper nouns
+            # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
             parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
             if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
                 # Multiple difficulty ratings, implying multiple POS as well
@@ -277,6 +312,7 @@ class OxfordPdf:
                     print(f"Expected 5 parts, got {parts}")
                     continue
                 word, pos1, level1, pos2, level2 = parts
+                word = en.conditionally_case(word)
                 rows.extend([
                     [
                         word,
@@ -294,7 +330,7 @@ class OxfordPdf:
                 if len(parts) < 4:
                     print(f"Expected at least 4 parts, got {parts}")
                     continue
-                word = parts[0]
+                word = en.conditionally_case(parts[0])
                 poss = parts[1:-1]
                 level = parts[-1]
                 rows.extend([
@@ -311,8 +347,10 @@ class OxfordPdf:
                     print(f"Expected 3 parts, got {parts}")
                     continue
                 word, pos, level = parts
+                if word.lower() == "november":
+                    print("Check")
                 rows.append([
-                    word,
+                    en.conditionally_case(word),
                     pos,
                     level,
                 ])
