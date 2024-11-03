@@ -1,4 +1,3 @@
-from abc import ABC
 from argparse import ArgumentParser
 from enum import StrEnum
 from functools import partial
@@ -17,9 +16,10 @@ conjugator = Conjugator(language="en")  # TODO silence sklearn pickle warnings
 translator = Translator()
 
 
-class Language(ABC):
+class Language:
 
     name: str
+    noun_article: Optional[str] = "the"
 
     def conjugate(
         self,
@@ -28,17 +28,52 @@ class Language(ABC):
         tense: str = "present",
         person: str = "he/she/it"
     ) -> str:
+        """Return verb's conjugation in this language"""
         if self.name != "en":
             # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
             raise NotImplementedError(f"Not setup to parse tenses of lang={self.name}")
         verb = conjugator.conjugate(infinitive)
         return verb[mood][tense][person]  # May raise KeyError for invalid parameters
 
+    def _get_noun_translation(self, english: str) -> str:
+        # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
+        if self.noun_article:
+            english = f"{self.noun_article} {english}"
+        translation = en.translate_to(english, dest=self.name)
+        plural = en.translate_to(en.pluralize(english), dest=self.name)
+        ending = self.extract_plural_ending(translation, plural)
+        if ending:
+            translation = translation + ", " + ending
+        return translation
+
+    def _get_verb_translation(self, english_infinitive: str) -> str:
+        translated_infinitive_prefix = en.translate_to("to", dest=self.name)
+        translation = en.translate_to(
+            text="to " + english_infinitive,  # Use infinitive to ensure ambiguous words aren't treated as nouns
+            dest=self.name
+        )
+        translation = translation.replace(translated_infinitive_prefix, "")
+        note = self.extract_irregular_verb_forms(english_infinitive, translation)
+        if note:
+            translation = translation + "[" + note + "]"
+        return translation
+
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
-        raise NotImplementedError
+        """Subclasses can define language specific behavior. None tells consumers to ignore"""
+        return None
 
     def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
-        raise NotImplementedError
+        """Subclasses can define language specific behavior. None tells consumers to ignore"""
+        return None
+
+    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+        """Translate a word from English into this language"""
+        method_map = {
+            PartOfSpeech.NOUN: self._get_noun_translation,
+            PartOfSpeech.VERB: self._get_verb_translation,
+        }
+        method = method_map.get(pos, partial(self.translate_from, src="en"))
+        return method(english)
 
     def pluralize(self, noun: str) -> str:
         if self.name != "en":
@@ -46,12 +81,24 @@ class Language(ABC):
         engine = inflect.engine()
         return engine.plural_noun(noun)
 
-    def translate(self, text: str, dst: str) -> str:
-        return translator.translate(text, src=self.name, dest=dst).text
+    def translate_from(self, text: str, src: str) -> str:
+        """Translate text from another language to this one"""
+        return translator.translate(text, src=src, dest=self.name).text
+
+    def translate_to(self, text: str, dest: str) -> str:
+        """Translate text from this language into another"""
+        return translator.translate(text, src=self.name, dest=dest).text
 
 
 class English(Language):
     name = "en"
+
+    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+        return english
+
+
+class French(Language):
+    noun_article = "a"  # Better for getting genders
 
 
 class German(Language):
@@ -82,8 +129,7 @@ class German(Language):
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
 
         # Get the reference conjugations in English
-        en = English()
-        _translate = partial(en.translate, dst="de")
+        _translate = partial(en.translate_to, dest="de")
         kwargs = {
             "infinitive": infinitive_en,
             "mood": "indicative",
@@ -165,6 +211,13 @@ class German(Language):
             "ü": "u",
         }
         return "".join([replacements.get(c, c) for c in de_text])
+
+
+en = English()
+foreign_language_map = {
+    "de": German(),
+    "fr": French(),
+}
 
 
 class OxfordPdf:
@@ -257,50 +310,20 @@ class PartOfSpeech(StrEnum):
 
 
 def translate(
-    df: pd.DataFrame,
-    dst: str,
-    src: str = "en",
+    pdf_path: str,
+    language: Language,
     limit: Optional[int] = None,
-    noun_article: Optional[str] = "the",
-    check_noun_plurals: bool = True,
-    check_irregular_verbs: bool = False,
 ) -> pd.DataFrame:
     """Translate parsed output of PDF into destination language"""
-
-    _translate = partial(translate_str, src=src, dst=dst)
-
-    def _impl(row):
-        text = row.en
-        if row.pos == PartOfSpeech.NOUN:
-            # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
-            if noun_article:
-                text = f"{noun_article} {text}"
-            translation = _translate(text)
-            if check_noun_plurals:
-                plural = _translate(pluralize(text))
-                ending = extract_plural_ending(translation, plural, lang=dst)
-                if ending:
-                    translation = translation + ", " + ending
-        elif row.pos == PartOfSpeech.VERB:
-            translation = _translate(
-                "to " + text  # Make sure ambiguous words aren't treated as nouns
-            ).replace("zu", "")
-            if check_irregular_verbs:
-                note = extract_irregular_verb_forms(text, translation, lang=dst)
-                if note:
-                    translation = translation + "[" + note + "]"
-        else:
-            translation = _translate(text)
-        return translation
-
-    assert all(c in df.columns for c in ("en", "pos", "level")), "Missing required columns"
+    oxford = OxfordPdf(pdf_path)
+    df = oxford.to_df()
     translated = []
     total = len(df)
     for i, row in df.iterrows():
         if limit and i > limit:
             break
         try:
-            translation = _impl(row)
+            translation = language.get_translation(row.en, row.pos)
         except Exception as e:
             print(f"Failed on row {i}: {row.en} -> {repr(e)}")
             translation = None
@@ -311,7 +334,7 @@ def translate(
     #  but in this case everything is `schnell` so it's a waste
     #  Also cardinal directions are 4x repeat, but articles are slightly different so they'd need to be grouped
     #  Probably something like df.groupby("en").dedupe(...) and look for x% overlapping characters
-    df[dst] = translated + [None] * (len(df) - len(translated))
+    df[language.name] = translated + [None] * (len(df) - len(translated))
     df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
 
     # TODO maybe helpful to print words that are different in English but received the same translation?
@@ -329,9 +352,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # TODO report percent success rate at each step (PDF to text, text to table, table to translation)
-    lines = parse_oxford_pdf(args.pdf_path)
-    df = extract_oxford_df(lines)
-    output = translate(df, args.dst, limit=args.limit)
+    language = foreign_language_map[args.dst]
+    output = translate(
+        pdf_path=args.pdf_path,
+        language=language,
+        limit=args.limit,
+    )
     base_file = "".join(args.pdf_path.split(".")[:-1])
     if args.split:
         for val in output[args.split].unique():
