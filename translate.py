@@ -305,6 +305,7 @@ class OxfordPdf:
     def to_df(self) -> pd.DataFrame:
         """Parse each entry string into a tabular row"""
         rows = []
+        errors = 0
         for line in self.lines:
             # FIXME part length assertions are failing quite often
             # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
@@ -313,6 +314,7 @@ class OxfordPdf:
                 # Multiple difficulty ratings, implying multiple POS as well
                 if len(parts) != 5:
                     print(f"Expected 5 parts, got {parts}")
+                    errors += 1
                     continue
                 word, pos1, level1, pos2, level2 = parts
                 rows.extend([
@@ -347,6 +349,7 @@ class OxfordPdf:
                 # Standard format: one POS and one difficulty
                 if len(parts) != 3:
                     print(f"Expected 3 parts, got {parts}")
+                    errors += 1
                     continue
                 word, pos, level = parts
                 rows.append([
@@ -354,6 +357,10 @@ class OxfordPdf:
                     pos,
                     level,
                 ])
+        print(
+            f"Dataframe creation: {errors} errors on {len(self.lines)} lines"
+            f" ({errors/len(self.lines) * 100:.2f}%)"
+        )
         return pd.DataFrame(rows, columns=["en", "pos", "level"])
 
 
