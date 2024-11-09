@@ -17,7 +17,8 @@ from pypdf import PdfReader
 from sklearn.base import InconsistentVersionWarning
 import spacy
 
-warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)  # mlconjug3
+warnings.filterwarnings("ignore", category=FutureWarning, message="You are using")  # spacy/pytorch
 conjugator = Conjugator(language="en")
 translator = Translator()
 try:
