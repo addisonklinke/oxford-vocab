@@ -206,7 +206,14 @@ class German(Language):
         else:
             raise NotImplementedError(f"Unsupported tense {tense}")
 
-    def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
+    def extract_irregular_verb_forms(
+        self,
+        infinitive_en: str,
+        infinitive_native: str,
+        rely_on_google_translate: bool = False
+    ) -> Optional[str]:
+        if not rely_on_google_translate:
+            return None  # TODO need to wait for mlconjug3 to make this at all valuable
 
         # Get the reference conjugations in English
         kwargs = {
