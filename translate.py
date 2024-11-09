@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 from enum import StrEnum
 from functools import partial
 from itertools import combinations
+import os
 import re
-import string
 from typing import List, Optional
 import warnings
 
@@ -484,8 +484,12 @@ if __name__ == "__main__":
     )
     base_file = "".join(args.pdf_path.split(".")[:-1])
     if args.split:
-        # FIXME merge with existing files
         for val in output[args.split].unique():
-            output.loc[output[args.split] == val].to_csv(base_file + f"-{val}.csv", index=False)
+            new = output.loc[output[args.split] == val]
+            split_path = base_file + f"-{val}.csv"
+            if os.path.isfile(split_path):
+                existing = pd.read_csv(split_path)
+                new = pd.concat([existing, new])
+            new.to_csv(split_path, index=False)
     else:
         output.to_csv(base_file + ".csv", index=False)
