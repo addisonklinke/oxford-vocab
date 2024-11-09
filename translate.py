@@ -54,12 +54,12 @@ class Language:
 
     def _get_verb_translation(self, english_infinitive: str) -> str:
         # FIXME returning a lot of capitalized words
-        translated_infinitive_prefix = en.translate_to("to", dest=self.name)
+        translated_infinitive_prefix = en.translate_to("to", dest=self.name).lower()
         translation = en.translate_to(
             text="to " + english_infinitive,  # Use infinitive to ensure ambiguous words aren't treated as nouns
             dest=self.name
         )
-        translation = translation.replace(translated_infinitive_prefix, "")
+        translation = translation.lower().replace(translated_infinitive_prefix, "")
         note = self.extract_irregular_verb_forms(english_infinitive, translation)
         if note:
             translation = translation + "[" + note + "]"
