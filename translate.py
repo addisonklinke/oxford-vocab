@@ -315,7 +315,6 @@ class OxfordPdf:
                     print(f"Expected 5 parts, got {parts}")
                     continue
                 word, pos1, level1, pos2, level2 = parts
-                word = en.conditionally_case(word)
                 rows.extend([
                     [
                         word,
@@ -332,13 +331,13 @@ class OxfordPdf:
                 # Multiple POS, all the same difficulty
                 if len(parts) < 4:
                     print(f"Expected at least 4 parts, got {parts}")
+                    errors += 1
                     continue
-                word = en.conditionally_case(parts[0])
                 poss = parts[1:-1]
                 level = parts[-1]
                 rows.extend([
                     [
-                        word,
+                        parts[0],
                         pos,
                         level,
                     ]
@@ -351,7 +350,7 @@ class OxfordPdf:
                     continue
                 word, pos, level = parts
                 rows.append([
-                    en.conditionally_case(word),
+                    word,
                     pos,
                     level,
                 ])
