@@ -291,6 +291,7 @@ class OxfordPdf:
         text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
         text = re.sub("(?<=[a-z])\n?[0-9]", "", text)  # Strip superscript that marauds as difficulty number
         text = text.replace("auxiliary", "").replace("modal", "")  # Italic annotations
+        text = re.sub(r"\(.+\)(\s+[nvadjco]+\.\s+[ABC][12])", r"\1", text)  # Clarifying notes in parentheses
 
         # Extract individual entries from the vocabulary list
         entry_regex = re.compile(
@@ -307,7 +308,6 @@ class OxfordPdf:
         rows = []
         errors = 0
         for line in self.lines:
-            # FIXME part length assertions are failing quite often
             # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
             parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
             if len(re.findall(f"[ABC][12]", line)) > 1:
@@ -357,10 +357,11 @@ class OxfordPdf:
                     pos,
                     level,
                 ])
-        print(
-            f"Dataframe creation: {errors} errors on {len(self.lines)} lines"
-            f" ({errors/len(self.lines) * 100:.2f}%)"
-        )
+        if errors:
+            print(
+                f"Dataframe creation: {errors} errors on {len(self.lines)} lines"
+                f" ({errors/len(self.lines) * 100:.2f}%)"
+            )
         return pd.DataFrame(rows, columns=["en", "pos", "level"])
 
 
