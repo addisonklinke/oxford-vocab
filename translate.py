@@ -182,6 +182,7 @@ class German(Language):
             raise NotImplementedError("German conjugation only supports indicative mood")
 
         # Check prefix
+        infinitive = infinitive.replace("zu", "").strip()
         for prefix in self.separable_prefixes:
             if infinitive.startswith(prefix):
                 stem = infinitive.replace(prefix, "")
@@ -219,11 +220,18 @@ class German(Language):
 
         # Convert to German
         # Add the explicit subject pronoun to avoid ambiguity
+        # Simple past is rarely used in spoken German, so Google Translate has a preference for the perfekt
+        # Since simple past is for narrating stories, adding "on the way" makes it think in this sense
         present_de = self.translate_from("he " + present, src="en").lower().replace("er ", "")
-        simple_past_de = self.translate_from("he " + simple_past, src="en").lower().replace(
-            "er ", "")  # FIXME returning perfekt instead of simple past
+        simple_past_de = self.translate_from(
+            "on the way, he " + simple_past, src="en"
+        ).lower().replace(
+            "er ", ""
+        ).replace(
+            "unterwegs", ""  # Remove prepositional phrase to leave just the verb
+        ).strip()
         perfect_de = self.translate_from(
-            "he had " + perfect  # Force had to get perfekt construction
+            "he had " + perfect, src="en"  # Force had to get perfekt construction
         ).lower().replace(
             "hatte", "hat"  # Google may think it's past perfekt
         ).replace(
