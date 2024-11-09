@@ -25,6 +25,7 @@ try:
     nlp = spacy.load("en_core_web_trf")  # Recommended for best accuracy by https://spacy.io/models
 except OSError as exc:
     raise RuntimeError("Missing spaCy model: run `python -m spacy download <model_name>` to fix") from exc
+POS_CHARS = "nvadjcopredt"
 
 
 class Language:
@@ -324,12 +325,12 @@ class OxfordPdf:
         text = "".join([i for i in text if ord(i) < 128])  # Strip non-ASCII characters
         text = re.sub("(?<=[a-z])\n?[0-9]", "", text)  # Strip superscript that marauds as difficulty number
         text = text.replace("auxiliary", "").replace("modal", "")  # Italic annotations
-        text = re.sub(r"\(.+\)(\s+[nvadjco]+\.\s+[ABC][12])", r"\1", text)  # Clarifying notes in parentheses
+        text = re.sub(rf"\(.+\)(\s+[{POS_CHARS}]+\.\s+[ABC][12])", r"\1", text)  # Clarifying notes in parentheses
 
         # Extract individual entries from the vocabulary list
         entry_regex = re.compile(
             "[a-zA-Z\\s]+\\s"  # English word (could contain space or be proper noun)
-            "[nvadjco"  # Letter abbreviations for POS
+            f"[{POS_CHARS}"  # Letter abbreviations for POS
             "ACB12,.( )]+"  # Might have separate difficulty ratings for different POS
             "\\.\\s"  # But this middle section always ends in a period 
             "[ABC][12]"  # The last (typically only) difficulty rating
@@ -404,6 +405,8 @@ class PartOfSpeech(StrEnum):
     ADJECTIVE = "adj"
     ADVERB = "adv"
     CONJUNCTION = "conj"
+    PREPOSITION = "prep"
+    DETERMINER = "det"
 
 
 def dedupe(df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
