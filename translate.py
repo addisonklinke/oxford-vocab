@@ -332,7 +332,7 @@ class OxfordPdf:
             "[a-zA-Z\\s]+\\s"  # English word (could contain space or be proper noun)
             f"[{POS_CHARS}"  # Letter abbreviations for POS
             "ACB12,.( )]+"  # Might have separate difficulty ratings for different POS
-            "\\.\\s"  # But this middle section always ends in a period 
+            "\\.,?\\s"  # But this middle section always ends in a period (and maybe a comma)
             "[ABC][12]"  # The last (typically only) difficulty rating
         )
         return re.findall(entry_regex, text)
