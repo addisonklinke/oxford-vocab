@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from enum import StrEnum
 from functools import partial
+from itertools import combinations
 import re
 import string
 from typing import List, Optional
@@ -10,11 +11,11 @@ import inflect
 from googletrans import Translator
 import mlconjug3
 from mlconjug3 import Conjugator
+from nltk import edit_distance
 import pandas as pd
 from pypdf import PdfReader
 from sklearn.base import InconsistentVersionWarning
 import spacy
-
 
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 conjugator = Conjugator(language="en")
@@ -56,6 +57,7 @@ class Language:
         return translation
 
     def _get_verb_translation(self, english_infinitive: str) -> str:
+        # FIXME returning a lot of capitalized words
         translated_infinitive_prefix = en.translate_to("to", dest=self.name)
         translation = en.translate_to(
             text="to " + english_infinitive,  # Use infinitive to ensure ambiguous words aren't treated as nouns
@@ -210,7 +212,7 @@ class German(Language):
             stem = infinitive_native
             prefix = ""
 
-        # TODO override `conjugate` method with this basic logic
+        # TODO-P1 override `conjugate` method with this basic logic
         perfekt_ge = "" if any(stem.startswith(p) for p in self.inseparable_prefixes) else "ge"
         stem = stem.replace("en", "")
         present_expected = f"{stem}t {prefix}".strip()
@@ -304,6 +306,7 @@ class OxfordPdf:
         """Parse each entry string into a tabular row"""
         rows = []
         for line in self.lines:
+            # FIXME part length assertions are failing quite often
             # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
             parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
             if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
@@ -347,8 +350,6 @@ class OxfordPdf:
                     print(f"Expected 3 parts, got {parts}")
                     continue
                 word, pos, level = parts
-                if word.lower() == "november":
-                    print("Check")
                 rows.append([
                     en.conditionally_case(word),
                     pos,
@@ -365,14 +366,73 @@ class PartOfSpeech(StrEnum):
     CONJUNCTION = "conj"
 
 
+def dedupe(df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
+    """Remove duplicate vocab entries"""
+
+    # Obvious ones where the same English word (under different POS) received the same translation
+    before = len(df)
+    df = df.drop_duplicates(subset=["en", dest])
+    print(f"Removed {before - len(df)} exact duplicates")
+
+    # Other times the translations might use different articles but are otherwise the same
+    # Group by English and use edit distance to find similar translations
+    # Calculate the average edit distance across all translations within a group
+    # Then assign boolean column and use later for filtering
+    # This is most often nouns and adjectives that are legitimate so filtering is off by default
+    # a reasonable threshold seems to be 0.5 if you'd like to turn it on
+
+    def _avg_edit_dist_within_thres(group) -> bool:
+        if len(group) == 1:
+            return False
+
+        def _preproc(s):
+            """Remove noun plurals/verb conjugations and switch to lowercase"""
+            # TODO consider spaCy for language-specific logic to removing articles
+            return re.sub(r"[,\\[].+$", "", s).lower()
+
+        edit_distances = []
+        for x, y in combinations(group, 2):
+            xp = _preproc(x)
+            yp = _preproc(y)
+            edit_distance_pct = edit_distance(xp, yp) / max(len(xp), len(yp))
+            edit_distances.append(edit_distance_pct)
+        avg_edit = sum(edit_distances) / len(edit_distances)
+        return avg_edit < edit_dist_pct
+
+    df["fuzzy_dupe"] = df.groupby("en")[dest].transform(_avg_edit_dist_within_thres)
+    print(f"Removing {df['fuzzy_dupe'].sum()} fuzzy duplicates")
+    df = df[~df["fuzzy_dupe"]].drop(columns=["fuzzy_dupe"])
+
+    # There can also be different English words that received the same translation
+    # These shouldn't be removed, but it's helpful to warn the user
+    # For flashcards in particular, they may want to revise these with a more specific word
+
+    def _print_ambiguous_translations(group: pd.DataFrame) -> None:
+        if len(group) == 1:
+            return
+        sep = "\n\t- "
+        print(
+            f"{group[dest].iloc[0]} assigned to multiple English words:"
+            f"{sep}{sep.join(group['en'])}".expandtabs(2)
+        )
+
+    print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
+    df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
+    return df
+
+
 def translate(
     pdf_path: str,
     language: Language,
     limit: Optional[int] = None,
 ) -> pd.DataFrame:
     """Translate parsed output of PDF into destination language"""
+
+    # Convert PDF into dataframe
     oxford = OxfordPdf(pdf_path)
     df = oxford.to_df()
+
+    # Get translations
     translated = []
     total = len(df)
     for i, row in df.iterrows():
@@ -385,16 +445,15 @@ def translate(
             translation = None
         translated.append(translation)
         print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
-    # TODO dedupe words, `fast` definitely appears in A1 list several times
-    #  due to multiple POS. It's okay if they have different translations
-    #  but in this case everything is `schnell` so it's a waste
-    #  Also cardinal directions are 4x repeat, but articles are slightly different so they'd need to be grouped
-    #  Probably something like df.groupby("en").dedupe(...) and look for x% overlapping characters
-    df[language.name] = translated + [None] * (len(df) - len(translated))
-    df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
 
-    # TODO maybe helpful to print words that are different in English but received the same translation?
-    #  Example: carry and wear both map to tragen
+    # Fill nulls when `limit` is set
+    df[language.name] = translated + [None] * (len(df) - len(translated))
+
+    # Clear out duplicates
+    df = dedupe(df, language.name)
+
+    # Include POS in English to disambiguate on flashcards
+    df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
     return df
 
 
@@ -408,6 +467,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # TODO report percent success rate at each step (PDF to text, text to table, table to translation)
+    # TODO option to load manual translations so edits can be preserved across changes to the code
+
     language = foreign_language_map[args.dst]
     output = translate(
         pdf_path=args.pdf_path,
@@ -416,6 +477,7 @@ if __name__ == "__main__":
     )
     base_file = "".join(args.pdf_path.split(".")[:-1])
     if args.split:
+        # FIXME merge with existing files
         for val in output[args.split].unique():
             output.loc[output[args.split] == val].to_csv(base_file + f"-{val}.csv", index=False)
     else:
