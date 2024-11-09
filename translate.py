@@ -296,7 +296,7 @@ class OxfordPdf:
         entry_regex = re.compile(
             "[a-zA-Z\\s]+\\s"  # English word (could contain space or be proper noun)
             "[nvadjco"  # Letter abbreviations for POS
-            "ACB12,.\\s]+"  # Might have separate difficulty ratings for different POS
+            "ACB12,.( )]+"  # Might have separate difficulty ratings for different POS
             "\\.\\s"  # But this middle section always ends in a period 
             "[ABC][12]"  # The last (typically only) difficulty rating
         )
