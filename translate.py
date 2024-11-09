@@ -309,7 +309,7 @@ class OxfordPdf:
             # FIXME part length assertions are failing quite often
             # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
             parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
-            if len(re.findall(f"[{string.ascii_uppercase}]", line)) > 1:
+            if len(re.findall(f"[ABC][12]", line)) > 1:
                 # Multiple difficulty ratings, implying multiple POS as well
                 if len(parts) != 5:
                     print(f"Expected 5 parts, got {parts}")
