@@ -341,28 +341,29 @@ class OxfordPdf:
         """Parse each entry string into a tabular row"""
         rows = []
         errors = 0
+        ABBREV_REGEX = re.compile("[,.]")
         for line in self.lines:
             # TODO use regex/spaCy to detect unexpected POS in the English word (like punctuation, numbers, etc)
-            parts = re.sub("[,.]", "", line).split()  # Don't need comma and abbreviation periods anymore
-            if len(re.findall(f"[ABC][12]", line)) > 1:
-                # Multiple difficulty ratings, implying multiple POS as well
-                if len(parts) != 5:
-                    print(f"Expected 5 parts, got {parts}")
+            parts = ABBREV_REGEX.sub("", line).split()  # Don't need comma and abbreviation periods anymore
+            num_levels = len(re.findall("[ABC][12]", line))
+
+            # Multiple difficulty ratings, implying multiple POS as well
+            if num_levels > 1:
+                pos_groups = re.findall(f"(?:(?:(?<=. )[{POS_CHARS}]+.(?:,\\s)?)+ [ABC][12])+", line)
+                if len(pos_groups) != num_levels:
+                    print(f"Expected one group of POS per level, got {pos_groups} for {num_levels} levels: {line}")
                     errors += 1
                     continue
-                word, pos1, level1, pos2, level2 = parts
-                rows.extend([
-                    [
-                        word,
-                        pos1,
-                        level1,
-                    ],
-                    [
-                        word,
-                        pos2,
-                        level2,
-                    ]
-                ])
+                for group in pos_groups:
+                    pos_parts = ABBREV_REGEX.sub("", group).split()
+                    level = pos_parts[-1]
+                    for pos in pos_parts[:-1]:
+                        rows.append([
+                            parts[0],
+                            pos,
+                            level,
+                        ])
+
             elif line.count(".") > 1:
                 # Multiple POS, all the same difficulty
                 if len(parts) < 4:
