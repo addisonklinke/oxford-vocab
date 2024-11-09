@@ -32,13 +32,7 @@ class Language:
     name: str
     noun_article: Optional[str] = "the"
 
-    def conjugate(
-        self,
-        infinitive: str,
-        mood: str,
-        tense: str,
-        person: str
-    ) -> str:
+    def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
         """Return verb's conjugation in this language"""
         if self.name not in mlconjug3.LANGUAGES:
             # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
@@ -111,15 +105,9 @@ class English(Language):
 
     name = "en"
 
-    def conjugate(
-        self,
-        infinitive: str,
-        mood: str = "indicative",
-        tense: str = "present",
-        person: str = "he/she/it"
-    ) -> str:
+    def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
         """Set default to present tense 3rd person singular"""
-        return super().conjugate(infinitive, mood, tense, person)
+        return super().conjugate(infinitive, tense, mood, person)
 
     def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
         return english
@@ -178,10 +166,48 @@ class German(Language):
         "zer",
     )
 
+    def conjugate(
+        self,
+        infinitive: str,
+        tense: str,
+        mood: str = "indicative",
+        person: str = "er/sie/es",
+    ) -> str:
+        """Limited range of hardcoded rules (does NOT properly handle irregular verbs)"""
+
+        # Enforce limitations
+        if person != "er/sie/es":
+            raise NotImplementedError("German conjugation only supports 3rd person singular")
+        if mood != "indicative":
+            raise NotImplementedError("German conjugation only supports indicative mood")
+
+        # Check prefix
+        for prefix in self.separable_prefixes:
+            if infinitive.startswith(prefix):
+                stem = infinitive.replace(prefix, "")
+                break
+        else:
+            stem = infinitive
+            prefix = ""
+
+        # Get the true stem by removing "-en" from infinitive
+        stem = stem.replace("en", "")
+
+        # Apply conjugation rules
+        if tense == "präsens":
+            return f"{stem}t {prefix}".strip()
+        elif tense == "perfekt":
+            # TODO-P3 handle auxiliary verb
+            perfekt_ge = "" if any(stem.startswith(p) for p in self.inseparable_prefixes) else "ge"
+            return f"{prefix}{perfekt_ge}{stem}t"
+        elif tense == "imperfekt":
+            return f"{stem}te {prefix}".strip()
+        else:
+            raise NotImplementedError(f"Unsupported tense {tense}")
+
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
 
         # Get the reference conjugations in English
-        _translate = partial(en.translate_to, dest="de")
         kwargs = {
             "infinitive": infinitive_en,
             "mood": "indicative",
@@ -193,10 +219,10 @@ class German(Language):
 
         # Convert to German
         # Add the explicit subject pronoun to avoid ambiguity
-        present_de = _translate("he " + present).lower().replace("er ", "")
-        simple_past_de = _translate("he " + simple_past).lower().replace(
+        present_de = self.translate_from("he " + present, src="en").lower().replace("er ", "")
+        simple_past_de = self.translate_from("he " + simple_past, src="en").lower().replace(
             "er ", "")  # FIXME returning perfekt instead of simple past
-        perfect_de = _translate(
+        perfect_de = self.translate_from(
             "he had " + perfect  # Force had to get perfekt construction
         ).lower().replace(
             "hatte", "hat"  # Google may think it's past perfekt
@@ -204,21 +230,12 @@ class German(Language):
             "war", "ist"
         ).split()[-1]  # Just interested in the gerund
 
-        # Determine whether they're irregular
-        for prefix in self.separable_prefixes:
-            if infinitive_native.startswith(prefix):
-                stem = infinitive_native.replace(prefix, "")
-                break
-        else:
-            stem = infinitive_native
-            prefix = ""
+        # Follow hardcoded conjugation to get the expected German (if verb was regular)
+        present_expected = self.conjugate(infinitive_native, "präsens")
+        simple_past_expected = self.conjugate(infinitive_native, "imperfekt")
+        perfect_expected = self.conjugate(infinitive_native, "perfekt")
 
-        # TODO-P1 override `conjugate` method with this basic logic
-        perfekt_ge = "" if any(stem.startswith(p) for p in self.inseparable_prefixes) else "ge"
-        stem = stem.replace("en", "")
-        present_expected = f"{stem}t {prefix}".strip()
-        simple_past_expected = f"{stem}te {prefix}".strip()
-        perfect_expected = f"{prefix}{perfekt_ge}{stem}t"
+        # Compare to determine what's irregular
         simple_past_is_perfekt = "hat" in simple_past_de or "ist" in simple_past_de  # Ignore buggy Google translate
         tense_is_regular = [
             present_de == present_expected,
