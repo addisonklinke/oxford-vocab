@@ -232,6 +232,14 @@ class German(Language):
         infinitive_native: str,
         rely_on_google_translate: bool = False
     ) -> Optional[str]:
+
+        # Irregulars are the same for all prefixes
+        all_prefixes = "|".join(self.separable_prefixes + self.inseparable_prefixes)
+        base_verb = re.sub(f"^({all_prefixes})", "", infinitive_native)
+        irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg["irregulars"]), None)
+        if irregular_key:
+            return self.cfg["irregulars"][irregular_key]
+
         if not rely_on_google_translate:
             return None  # TODO need to wait for mlconjug3 to make this at all valuable
 
