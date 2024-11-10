@@ -12,6 +12,8 @@ irregulars:
   aussehen: sieht aus, sah aus, hat ausgesehen
   aussprechen: spricht, sprach, hat gesprochen
   aussteigen: stieg aus, ist ausgestiegen
+  anziehen: zog an, ist angezogen
+  auskennen: kannt-, hat gekannt
   ausziehen: zog aus, ist ausgezogen
   backen: bäckt, hat gebacken
   befehlen: befiehlt, befahl, hat befohlen
@@ -21,21 +23,21 @@ irregulars:
   beschreiben: beschrieb, hat beschrieben
   besitzen: besaß, hat besessen
   besprechen: bespricht, besprach, hat besprochen
-  bestehen aus: bestand aus, hat ausbestanden
+  bestehen: bestand, hat bestanden
   betreiben: betrieb, hat betrieben
   betreten: betritt, betrat, hat betreten
   betrügen: betrog, hat betrogen
   beweisen: bewies, hat bewiesen
+  bewerben: bewirbt, bewarb, hat beworben
   biegen: bog, hat gebogen
   bieten: bot, hat geboten
   binden: band, hat gebunden
-  bitten um: bat, hat gebeten
+  bitten: bat, hat gebeten
   bleiben: blieb, ist geblieben
   braten: brät, briet, hat gebraten
   brechen: bricht, brach, hat gebrochen
   brennen: brannt-, hat gebrannt
   bringen: bracht-, hat gebracht
-  dabei sein: ist, war, ist gewesen
   dürfen: darf
   einfallen: fällt ein, fiel ein, ist eingefallen
   einladen: lädt ein, lud ein, hat eingeladen
@@ -98,10 +100,6 @@ irregulars:
   schwimmen: schwamm, ist geschwommen
   sehen: sieht, sah, hat gesehen
   sein: ist, war, ist gewesen
-  sich anziehen: zog an, ist angezogen
-  sich auskennen: kannt-, hat gekannt
-  sich ausziehen: zog aus, ist ausgezogen
-  sich bewerben: bewirbt, bewarb, hat beworben
   singen: sang, hat gesungen
   sitzen: saß, hat gesessen
   sollen: soll
