@@ -4,6 +4,7 @@ from functools import partial
 from itertools import combinations
 import os
 import re
+import traceback
 from typing import List, Optional
 import warnings
 
@@ -522,8 +523,9 @@ def translate(
             break
         try:
             translation = language.get_translation(row.en, row.pos)
-        except Exception as e:
-            print(f"Failed on row {i}: {row.en} -> {repr(e)}")
+        except:
+            print(f"Failed on row {i}: {row.en}")
+            traceback.print_exc()
             translation = None
         translated.append(translation)
         print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
