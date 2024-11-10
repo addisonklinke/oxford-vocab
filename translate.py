@@ -47,7 +47,10 @@ class Language:
         else:
             self.cfg = {}
         for key in (self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
-            if key not in self.cfg:
+            if (
+                key not in self.cfg
+                or self.cfg[key] is None
+            ):
                 self.cfg[key] = {}
 
     def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
