@@ -54,6 +54,8 @@ irregulars:
   essen: isst, aß, hat gegessen
   fahren: fährt, fuhr, ist gefahren
   fallen: fällt, fiel, ist gefallen
+  fangen: fängt, fing, hat gefangen
+  fehlen: ~  # Although befehlen is irregular, the base verb is not
   fernsehen: sieht fern, sah fern, hat gesehen
   finden: fand, hat gefunden
   fliegen: flog, ist gefliegen
@@ -64,6 +66,7 @@ irregulars:
   genießen: genoss, hat genossen
   gewinnen: gewann, hat gewonnen
   gießen: goß, hat gegossen
+  gleichen: glich, hat geglichen
   haben: hat, hatt-
   halten: hält, hielt, hat gehalten
   heißen: hieß, hat geheißen
@@ -75,6 +78,7 @@ irregulars:
   klingen: klang, hat geklungen
   kommen: kömmt, kam, ist gekommen
   können: kann
+  laden: ~  # Although einladen is irregular, the base verb is not
   laufen: läuft, lief, ist gelaufen
   leihen: lieh, hat geliehen
   lesen: liest, las, hat gelesen
@@ -89,15 +93,18 @@ irregulars:
   nennen: nannt-, hat genannt
   passieren: ist passiert
   schaffen: schuf, hat geschaffen
+  scheiden: schied, ist geschieden
   scheinen: schien , hat geschienen
   schieben: schob, hat geschoben
   schlafen: schläft, schlief, hat geschlafen
   schlagen: schlägt, schlug, hat geschlagen
   schlieβen: schloss, hat geschlossen
   schneiden: schnitt, hat geschnitten
+  schrecken: schrickt, schrak, ist geschrocken
   schreiben: schrieb, hat geschrieben
   schweigen: schwieg, hat geschwiegen
   schwimmen: schwamm, ist geschwommen
+  schwinden: schwand, ist geschwunden
   sehen: sieht, sah, hat gesehen
   sein: ist, war, ist gewesen
   singen: sang, hat gesungen
@@ -107,13 +114,16 @@ irregulars:
   sprechen: spricht, sprach, hat gesprochen
   springen: sprang, ist gesprungen
   stattfinden: fand statt, hat stattgefunden
+  stehen: stand, hat gestanden
   stehlen: stiehlt, stahl, hat gestohlen
   steigen: stieg, ist gestiegen
   sterben: stirbt, starb, ist gestorben
   tragen: trägt, trug, hat getragen
   treffen: trifft, traf, hat getroffen
   treiben: trieb, hat getrieben
+  treten: tritt, trat, ist getreten
   trinken: trank, hat getrunken
+  trügen: trog, hat getrogen
   tun: tut, tat, hat getan
   umgeben: umgibt, umgab, hat umgeben
   unterbrechen: unterbricht, unterbrach, hat unterbrochen
@@ -136,6 +146,7 @@ irregulars:
   weggehen: ging weg, ist weggegangen
   wegwerfen: wirft weg, warf weg, hat weggeworfen
   wehtun: tut weh, tat weh, hat wehgetan
+  weisen: wies, hat gewiesen
   werden: wird, wurde, ist geworden
   werfen: wirft, warf, hat geworfen
   wiedersehen: sieht wieder, sah wieder, hat wiedergesehen
