@@ -470,10 +470,14 @@ def dedupe(df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFr
 
         edit_distances = []
         for x, y in combinations(group, 2):
+            if not x or not y:
+                continue
             xp = _preproc(x)
             yp = _preproc(y)
             edit_distance_pct = edit_distance(xp, yp) / max(len(xp), len(yp))
             edit_distances.append(edit_distance_pct)
+        if not edit_distances:
+            return False
         avg_edit = sum(edit_distances) / len(edit_distances)
         return avg_edit < edit_dist_pct
 
