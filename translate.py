@@ -523,7 +523,7 @@ if __name__ == "__main__":
     if args.split:
         for val in output[args.split].unique():
             new = output.loc[output[args.split] == val]
-            split_path = base_file + f"-{val}.csv"
+            split_path = args.dst + f"-{val}.csv"
             if os.path.isfile(split_path):
                 existing = pd.read_csv(split_path)
                 new = pd.concat([existing, new])
