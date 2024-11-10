@@ -33,6 +33,9 @@ class Language:
 
     name: str
     noun_article: Optional[str] = "the"
+    TRANSLATIONS_KEY = "translations"
+    IRREGULARS_KEY = "irregulars"
+    PLURALS_KEY = "plurals"
 
     def __init__(self):
         """Load manually defined translations"""
@@ -41,7 +44,10 @@ class Language:
             with open(cfg_path) as f:
                 self.cfg = yaml.safe_load(f)
         else:
-            self.cfg = {k: {} for k in ("translations", "irregulars", "plurals")}
+            self.cfg = {}
+        for key in (self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
+            if key not in self.cfg:
+                self.cfg[key] = {}
 
     def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
         """Return verb's conjugation in this language"""
@@ -56,8 +62,8 @@ class Language:
         if self.noun_article:
             english = f"{self.noun_article} {english}"
         translation = en.translate_to(english, dest=self.name)
-        if translation in self.cfg["plurals"]:
-            ending = self.cfg["plurals"][translation]
+        if translation in self.cfg[self.PLURALS_KEY]:
+            ending = self.cfg[self.PLURALS_KEY][translation]
         else:
             plural = en.translate_to(en.pluralize(english), dest=self.name)
             ending = self.extract_plural_ending(translation, plural)
@@ -73,8 +79,8 @@ class Language:
             dest=self.name
         )
         translation = translation.lower().replace(translated_infinitive_prefix, "")
-        if translation in self.cfg["irregulars"]:
-            note = self.cfg["irregulars"][translation]
+        if translation in self.cfg[self.IRREGULARS_KEY]:
+            note = self.cfg[self.IRREGULARS_KEY][translation]
         else:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
         if note:
@@ -95,7 +101,7 @@ class Language:
 
     def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
         """Translate a word from English into this language"""
-        manual_translation = self.cfg["translations"].get(english)
+        manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(english)
         if manual_translation:
             return manual_translation
         method_map = {
@@ -237,9 +243,9 @@ class German(Language):
         # Irregulars are the same for all prefixes
         all_prefixes = "|".join(self.separable_prefixes + self.inseparable_prefixes)
         base_verb = re.sub(f"^({all_prefixes})", "", infinitive_native)
-        irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg["irregulars"]), None)
+        irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg[self.IRREGULARS_KEY]), None)
         if irregular_key:
-            return self.cfg["irregulars"][irregular_key]
+            return self.cfg[self.IRREGULARS_KEY][irregular_key]
 
         if not rely_on_google_translate:
             return None  # TODO need to wait for mlconjug3 to make this at all valuable
