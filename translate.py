@@ -158,6 +158,7 @@ class English(Language):
 
 
 class French(Language):
+    name = "fr"
     noun_article = "a"  # Better for getting genders
 
 
