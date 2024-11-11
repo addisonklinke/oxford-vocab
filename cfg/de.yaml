@@ -1,3 +1,8 @@
+disambiguations:
+  bad: objectively
+  bag: durable material, with handles  # https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fxy8gq7ye9yh51.jpg
+  clean: thoroughly
+  dress [v.]: put on clothes
 irregulars:
   Ski fahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
@@ -153,3 +158,84 @@ irregulars:
   wissen: weiß, wusst-, hat gewusst
   wollen: will
   ziehen: zog, hat gezogen
+plurals:
+  der Apfel: -̈
+  die Bar: -s
+  die Gegend: -en
+  der Junge: -n
+  das Geschäft: -e
+  das Zentrum: Zentren
+  die Schokolade: -n
+  das Datum: Daten
+  der Arzt: -̈e
+  die Veranstaltung: -en
+  die Tatsache: -n
+  der Fisch: -e
+  das Essen: "-"
+  der Vorderseite: -n
+  das Fitnessstudio: -s
+  der Brief: -e
+  das Magazin: -e
+  das Fleisch: -e
+  die Mitternacht: -̈e
+  der Augenblick: -e
+  das Museum: Museen
+  die Nachbarschaft: -en
+  die Bestellung: -en
+  der Elternteil: Eltern
+  die Party: -s
+  der Reisepass: -̈e
+  der Satz: -̈e
+  der Reis: -e
+  der Klang: -̈e
+  der Bahnhof: -̈e
+  das Thema: Themen
+translations:
+  become [v.]: werden
+  bad (objectively) [adj.]: schlecht
+  bad (subjectively) [adj.]: schlimm
+  bag (durable material, with handles) [n.]: die Tasche, -n
+  clean (thoroughly) [v.]: reinigen
+  clean (wipe) [v.]: putzen
+  common (shared) [adj.]: gemeinsam
+  common (typical) [adj.]: häufig
+  (whipped) cream [n.]: die Sahne
+  create (make, formal) [v.]: erstellen
+  design (something artistic) [v.]: entwerfen
+  dish (menu item) [n.]: das Gericht, -e
+  dish (flat plate) [n.]: die Platte, -n
+  dish (plate with slight depth) [n.]: der Teller, -
+  email [v.]: E-Mail schicken
+  to end [v.]: ~
+  exercise (physically) [v.]: trainieren
+  feel (sense) [v.]: fühlen
+  fine (fancy) [adj.]: fein
+  fine (thin) [adj.]: dünn
+  form (paperwork) [n.]: das Formular, -e
+  get (receive) [v.]: bekommen [bekömmt, bekam, ist bekommen]
+  house (accomodate) [v.]: unterbringen [unterbringt, unterbracht-, hat untergebracht]
+  include [v.]: enthalten [enthält, enthielt, hat enthalten]
+  know (knowledge) [v.]: wissen [weiß, wusst-, hat gewusst]
+  leave (depart) [v.]: verlassen [verlässt, verließ, hat verlassen]
+  meter (unit of length) [n.]: der Meter, -
+  meter (measuring device) [n.]: das Messgerät, -e
+  mom (informal) [n.]: die Mutti
+  nice [adj.]: nett
+  ocean (separting continents) [n.]: der Ozean, -e
+  ocean (salt water body) [n.]: das Meer, -e
+  pen (generic) [n.]: der Stift, -e
+  pen (specific) [n.]: der Kugelschreiber, -
+  photograph [n.]: die Fotografie, -n
+  post (on internet forum) [n.]: der Beitrag, -̈e
+  put (place in an upgright position) [v.]: stellen
+  send (inanimate/abstract objects) [v.]: senden
+  send (animate objects) [v.]: schicken
+  sheep [n.]: das Schaf, -e
+  sound (tone) [n.]: der Klang, -̈e
+  sound (non-musical noise) [n.]: das Geräusch, -e
+  sound (loud, unwelcome) [adj.]: der Lärm, -
+  spend (money) [v.]: ausgeben [gibt aus, gab aus, hat ausgegeben]
+  spend (time) [v.]: verbringen [verbracht-, hat vebracht]
+  spring (season) [n.]: der Frühling, -e
+  stop (breakpoint) [n.]: der Stopp, -s
+  (research) study [n.]: die Studie, -n
