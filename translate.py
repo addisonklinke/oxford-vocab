@@ -113,6 +113,7 @@ class Language:
             PartOfSpeech.VERB: self._get_verb_translation,
         }
         method = method_map.get(pos, partial(self.translate_from, src="en"))
+        # TODO return an object with word, context, POS, etc attrs and use a default formatter class to get the string
         return method(english)
 
     def pluralize(self, noun: str) -> str:
@@ -196,6 +197,18 @@ class German(Language):
         "ver",
         "zer",
     )
+
+    def _get_noun_translation(self, english: str) -> str:
+        """Make sure article is lowercase"""
+        translation = super()._get_noun_translation(english)
+        article, *noun = translation.split()
+        article = article.lower()
+        noun[0] = noun[0].capitalize()
+        return article + " " + " ".join(noun)
+
+    def _get_verb_translation(self, english_infinitive: str) -> str:
+        translation = super()._get_verb_translation(english_infinitive)
+        return re.sub("^u?m ", "", translation)  # Remove the leftover of zum / um zu
 
     def conjugate(
         self,
@@ -325,6 +338,13 @@ class German(Language):
                 print(f"Failed to find plural ending for {singular} -> {plural}")
                 ending = None
         return ending
+
+    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+        """Only nouns should be capitalized in German"""
+        translation = super().get_translation(english, pos)
+        if pos != PartOfSpeech.NOUN:
+            return translation.lower()
+        return translation
 
     @staticmethod
     def remove_umlauts(de_text: str) -> str:
