@@ -98,7 +98,7 @@ class Language:
         else:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
         if note:
-            translation = translation + "[" + note + "]"
+            translation = translation + " [" + note + "]"
         return translation
 
     @staticmethod
