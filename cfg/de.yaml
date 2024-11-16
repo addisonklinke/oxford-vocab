@@ -3,6 +3,12 @@ disambiguations:
   bag: durable material, with handles  # https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fxy8gq7ye9yh51.jpg
   clean: thoroughly
   dress [v.]: put on clothes
+skip:
+  # These are almost always adverbs, so duplicating with the noun article does't add much for studying
+  - today [n.]
+  - tomorrow [n.]
+  - tonight [n.]
+  - yesterday [n.]
 irregulars:
   Ski fahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
@@ -43,6 +49,7 @@ irregulars:
   brechen: bricht, brach, hat gebrochen
   brennen: brannt-, hat gebrannt
   bringen: bracht-, hat gebracht
+  denken: dachte, hat gedacht
   dürfen: darf
   einfallen: fällt ein, fiel ein, ist eingefallen
   einladen: lädt ein, lud ein, hat eingeladen
@@ -190,6 +197,14 @@ plurals:
   der Klang: -̈e
   der Bahnhof: -̈e
   das Thema: Themen
+  das Team: -s
+  das Ding: -e
+  die Reise: -n
+  die Wende: -n
+  der Urlaub: -e
+  das Gemüse: "-"
+  die Website: -s
+  die Frau: -en
 translations:
   become [v.]: werden
   bad (objectively) [adj.]: schlecht
@@ -239,3 +254,4 @@ translations:
   spring (season) [n.]: der Frühling, -e
   stop (breakpoint) [n.]: der Stopp, -s
   (research) study [n.]: die Studie, -n
+  topic [n.]: der Inhalt, -e  # Avoid duplication of `subject -> Thema`
