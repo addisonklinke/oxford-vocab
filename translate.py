@@ -573,6 +573,9 @@ def translate(
 
     # Include POS in English to disambiguate on flashcards
     df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
+
+    # Reorder columns for easier copy-paste to flashcard services like Quizlet
+    df = df[["en", language.name, "level", "pos"]]
     return df
 
 

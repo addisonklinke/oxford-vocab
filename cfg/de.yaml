@@ -256,3 +256,4 @@ translations:
   stop (breakpoint) [n.]: der Stopp, -s
   (research) study [n.]: die Studie, -n
   topic [n.]: der Inhalt, -e  # Avoid duplication of `subject -> Thema`
+  afternoon [n.]: der Nachmittag, -e
