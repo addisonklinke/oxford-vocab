@@ -126,7 +126,7 @@ class Language:
         }
         method = method_map.get(pos, partial(self.translate_from, src="en"))
         # TODO return an object with word, context, POS, etc attrs and use a default formatter class to get the string
-        return method(english)
+        return method(english).strip()
 
     def pluralize(self, noun: str) -> str:
         if self.name != "en":
