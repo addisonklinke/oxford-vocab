@@ -31,9 +31,19 @@ POS_CHARS = "nvadjcopredt"
 
 
 class Language:
+    """Base class for handling translations
+
+    Manually defined translations from a config YAML are applied in a few locations
+        * `.get_translation()`
+            * Checks `cfg["translations"]` before doing anything else
+            * Skips anything in `cfg["skip"]` (based on word and POS)
+        * `_get_noun_translation()` gives preference to `cfg["plurals"]`
+        * `_get_verb_translation()` gives preference to `cfg["irregulars"]`
+    """
 
     name: str
     noun_article: Optional[str] = "the"
+    SKIP_KEY = "skip"
     TRANSLATIONS_KEY = "translations"
     IRREGULARS_KEY = "irregulars"
     PLURALS_KEY = "plurals"
@@ -46,7 +56,7 @@ class Language:
                 self.cfg = yaml.safe_load(f)
         else:
             self.cfg = {}
-        for key in (self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
+        for key in (self.SKIP_KEY, self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
             if (
                 key not in self.cfg
                 or self.cfg[key] is None
@@ -103,8 +113,10 @@ class Language:
         """Subclasses can define language specific behavior. None tells consumers to ignore"""
         return None
 
-    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+    def get_translation(self, english: str, pos: "PartOfSpeech") -> Optional[str]:
         """Translate a word from English into this language"""
+        if f"{english} [{pos}.]" in self.cfg[self.SKIP_KEY]:
+            return None
         manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(english)
         if manual_translation:
             return manual_translation
