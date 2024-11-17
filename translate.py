@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from collections import defaultdict
 from enum import StrEnum
 from functools import partial
 from itertools import combinations
@@ -50,6 +51,8 @@ class Language:
 
     def __init__(self):
         """Load manually defined translations"""
+
+        # Convert config YAML to attribute
         cfg_path = os.path.join(os.path.dirname(__file__), f"cfg/{self.name}.yaml")
         if os.path.isfile(cfg_path):
             with open(cfg_path) as f:
@@ -63,13 +66,18 @@ class Language:
             ):
                 self.cfg[key] = {}
 
-    def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
-        """Return verb's conjugation in this language"""
-        if self.name not in mlconjug3.LANGUAGES:
-            # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
-            raise NotImplementedError(f"Language {self.name} not supported by mlconjug3")
-        verb = conjugator.conjugate(infinitive)
-        return verb[mood][tense][person]  # May raise KeyError for invalid parameters
+        # Parse manually defined translations for disambiguating notes and POS
+        # TODO consider allowing parenthetical note before English word (sometimes it reads more naturally that way)
+        english_regex = re.compile(r"([a-z]+)(?:\s\((.+)\))? \[([a-z]+)\.\]")
+        self.ambiguous_words = defaultdict(list)
+        for english_full, translation in self.cfg[self.TRANSLATIONS_KEY].items():
+            s = english_regex.match(english_full)
+            if not s:
+                print(f"Failed to parse manual translation: {english_full}")
+                continue
+            english_word, note, pos = s.groups()
+            if note:
+                self.ambiguous_words[english_word].append((note, pos, translation))
 
     def _get_noun_translation(self, english: str) -> str:
         # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
@@ -101,9 +109,42 @@ class Language:
             translation = translation + " [" + note + "]"
         return translation
 
+    def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
+        """Return verb's conjugation in this language"""
+        if self.name not in mlconjug3.LANGUAGES:
+            # TODO revisit after https://github.com/Ars-Linguistica/mlconjug3/issues/331
+            raise NotImplementedError(f"Language {self.name} not supported by mlconjug3")
+        verb = conjugator.conjugate(infinitive)
+        return verb[mood][tense][person]  # May raise KeyError for invalid parameters
+
     @staticmethod
     def conditionally_case(text: str) -> str:
         raise NotImplementedError
+
+    def disambiguate(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Disambiguate translations based on manual notes"""
+        assert "en" in df.columns, "English column must be present"
+        assert self.name in df.columns, f"{self.name} column must be present"
+
+        # Get rid of existing translations
+        to_remove = []
+        english_word2level = df.set_index("en")["level"].to_dict()
+        for i, row in df.iterrows():
+            if row.en in self.ambiguous_words:
+                to_remove.append(i)
+        df.drop(to_remove, axis=0, inplace=True)
+
+        # Replace with manual translations
+        new_rows = []
+        for english, translations in self.ambiguous_words.items():
+            for note, pos, translation in translations:
+                new_rows.append({
+                    "en": english,
+                    self.name: translation,
+                    "pos": pos,
+                    "level": english_word2level[english],
+                })
+        return pd.concat([df, pd.DataFrame(new_rows)])
 
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
         """Subclasses can define language specific behavior. None tells consumers to ignore"""
@@ -568,7 +609,8 @@ def translate(
     # Fill nulls when `limit` is set
     df[language.name] = translated + [None] * (len(df) - len(translated))
 
-    # Clear out duplicates
+    # Disambiguate and/or clear out duplicates
+    df = language.disambiguate(df)
     df = dedupe(df, language.name)
 
     # Include POS in English to disambiguate on flashcards

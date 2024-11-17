@@ -215,14 +215,14 @@ translations:
   clean (wipe) [v.]: putzen
   common (shared) [adj.]: gemeinsam
   common (typical) [adj.]: häufig
-  (whipped) cream [n.]: die Sahne
+  cream (whipped) [n.]: die Sahne
   create (make, formal) [v.]: erstellen
   design (something artistic) [v.]: entwerfen
   dish (menu item) [n.]: das Gericht, -e
   dish (flat plate) [n.]: die Platte, -n
   dish (plate with slight depth) [n.]: der Teller, -
   email [v.]: E-Mail schicken
-  to end [v.]: ~
+  end [v.]: ~
   exercise (physically) [v.]: trainieren
   feel (sense) [v.]: fühlen
   fine (fancy) [adj.]: fein
@@ -254,6 +254,6 @@ translations:
   spend (time) [v.]: verbringen [verbracht-, hat vebracht]
   spring (season) [n.]: der Frühling, -e
   stop (breakpoint) [n.]: der Stopp, -s
-  (research) study [n.]: die Studie, -n
+  study (research) [n.]: die Studie, -n
   topic [n.]: der Inhalt, -e  # Avoid duplication of `subject -> Thema`
   afternoon [n.]: der Nachmittag, -e
