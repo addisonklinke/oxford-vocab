@@ -77,7 +77,7 @@ class Language:
                 continue
             english_word, note, pos = s.groups()
             if note:
-                self.ambiguous_words[english_word].append((note, pos, translation))
+                self.ambiguous_words[(english_word, pos)].append((note, translation))
 
     def _get_noun_translation(self, english: str) -> str:
         # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
@@ -130,20 +130,21 @@ class Language:
         to_remove = []
         english_word2level = df.set_index("en")["level"].to_dict()
         for i, row in df.iterrows():
-            if row.en in self.ambiguous_words:
+            if (row.en, row.pos) in self.ambiguous_words:
                 to_remove.append(i)
         df.drop(to_remove, axis=0, inplace=True)
 
         # Replace with manual translations
         new_rows = []
-        for english, translations in self.ambiguous_words.items():
-            for note, pos, translation in translations:
+        for (english, pos), translations in self.ambiguous_words.items():
+            for note, translation in translations:
                 new_rows.append({
                     "en": english,
                     self.name: translation,
                     "pos": pos,
                     "level": english_word2level[english],
                 })
+        assert len(new_rows) >= len(to_remove), "Failed to replace all ambiguous translations"
         return pd.concat([df, pd.DataFrame(new_rows)])
 
     def extract_irregular_verb_forms(self, infinitive_en: str, infinitive_native: str) -> Optional[str]:
