@@ -53,6 +53,7 @@ class Language:
         """Load manually defined translations"""
 
         # Convert config YAML to attribute
+        # TODO use directional name for config files to indicate source language
         cfg_path = os.path.join(os.path.dirname(__file__), f"cfg/{self.name}.yaml")
         if os.path.isfile(cfg_path):
             with open(cfg_path) as f:
@@ -240,6 +241,7 @@ class German(Language):
         "ein",
         "mit",
         "nach",
+        "um",
         "vor",
         "zu",
     )
@@ -251,6 +253,8 @@ class German(Language):
         "ver",
         "zer",
     )
+
+    # TODO handle some basic plural rules like -ung and -heit
 
     def _get_noun_translation(self, english: str) -> str:
         """Make sure article is lowercase"""
