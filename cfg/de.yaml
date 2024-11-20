@@ -4,13 +4,23 @@ disambiguations:
   clean: thoroughly
   dress [v.]: put on clothes
 skip:
+  - might [v.]  # Just the past-tense of may, which doesn't need to be a separate entry
   # These are almost always adverbs, so duplicating with the noun article does't add much for studying
   - today [n.]
   - tomorrow [n.]
   - tonight [n.]
   - yesterday [n.]
+  # Same translation as the adverb
+  - electric [adj.]
+  - exact [adj.]
+  - loud [adv.]
+  # More formal noun that doesn't have a different translation
+  - mathematics [n.]
+  # Already covered by manual translations (with a disambiguating note)
+  - plate [n.]
+  - ride [n.]
 irregulars:
-  Ski fahren: fährt Ski, fuhr Ski, ist Ski gefahren
+  skifahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
   anfangen: fängt an, fing an, hat angefangen
   ankommen: kömmt an, kam an, ist angekommen
@@ -206,6 +216,67 @@ plurals:
   das Gemüse: "-"
   die Website: -s
   die Frau: -en
+  die Werbung: -en
+  der Durchschnitt: -e
+  das Verhalten: "-"
+  der Nutzen: "-"
+  das Bisschen: "-"
+  die Wahl: -en
+  die Gemeinschaft: -en
+  die Konkurrenz: -en
+  der Zustand: -̈e
+  die Kontrolle: -n
+  der Verbrecher: "-"
+  die Menge: -n
+  der Tod: -e
+  der Nachtisch: -e
+  die Richtung: -en
+  die Wirkung: -en
+  der Strom: -̈e
+  der Ventilator: -en
+  die Landwirtschaft: -en
+  die Angst: -̈e
+  das Gold: "-"
+  der Gast: -̈e
+  der Kerl: -e
+  der Anstieg: -e
+  das Individuum: Individuen
+  die Branche: -n
+  der Schmuck: "-"
+  das Niveau: -s
+  die Marke: -n
+  die Sache: -n
+  die Medizin: -en
+  der Geist: -e
+  der Lärm: "-"
+  der Hinweis: -e
+  die Gelegenheit: -en
+  def Ofen: -̈
+  die Bezahlung: -en
+  der Frieden: "-"
+  der Penny: -s
+  die Erlaubnis: -se
+  die Bevölkerung: -en
+  der Besitz: -e
+  der Rekord: -e
+  der Kühlschrank: -̈e
+  die Rezension: -en
+  die Suche: -n
+  der Dienst: -e
+  das Silber: "-"
+  der Himmel: "-"
+  der Sprecher: "-"
+  die Bühne: -n  # Careful to pronounce umlaut since `Buhne` means groin
+  die Treppe: -n
+  der Stempel: "-"
+  der Herd: -e
+  der Begriff: -e
+  die Ausbildung: -en
+  die Vielfelt: "-"
+  die Aussicht: -en
+  das Virus: Viren
+  das Web: -en
+  das Holz: -̈er
 translations:
   become [v.]: werden
   bad (objectively) [adj.]: schlecht
@@ -257,3 +328,71 @@ translations:
   study (research) [n.]: die Studie, -n
   topic [n.]: der Inhalt, -e  # Avoid duplication of `subject -> Thema`
   afternoon [n.]: der Nachmittag, -e
+  act (do something) [v.]: handeln
+  act (behaved like) [v.]: sich verhalten
+  act (in theater) [v.]: auftreten
+  actually [adj.]: tatsächlich
+  advertise [v.]: werben
+  amount (mathematical sum) [n.]: die Summe, -n
+  amount (number of things) [n.]: der Betrag, -̈e
+  anymore [adv.]: nicht mehr
+  assistant [adj.]: ~  # Doesn't really make sense as an adjective
+  beat (in a competition) [v.]: schlagen [schlägt, schlug, hat geschlagen]
+  beat (hit physically) [v.]: verprügeln
+  boil (fully above boiling point) [v.]: kochen
+  simmer [v.]: sieden
+  camping [n.]: das Camping
+  candy [n.]: die Süßigkeit, -en
+  climate [n.]: das Klima, -s
+  code (program) [v.]: verschlüsseln
+  degree (academic) [n.]: der Abschluss, -̈e
+  degree (temperature) [n.]: das Grad, -e
+  director (cinematic) [n.]: der Regisseur, -e
+  director (manager) [n.]: der Direktor, -en
+  drama (theater) [n.]: das Drama, Dramen
+  drive (computer) [n.]: das Laufwerk, -e
+  drive (mechanical) [n.]: der Antrieb, -e
+  drive (ride, trip) [n.]: die Fahrt, -en
+  express (describe) [v.]: ausdrücken
+  figure (physical form, fitness) [n.]: die Figur, -en
+  finish (line, in sports) [n.]: das Ziel, -e
+  finish (placement in a competition) [n.]: das Finish, -s
+  fire (terminate employment) [v.]: entlassen [entlässt, entließ, hat entlassen]
+  flat [adj.]: flach
+  grocery (store) [n.]: das Lebensmittelgeschäft, -e
+  himself [pron.]: sich
+  hit (popular item) [n.]: der Hit, -s
+  hit (physical blow) [n.]: der Schlag, -̈e
+  hit (sports / search match) [n.]: der Treffer, -
+  hockey [n.]: das Eishockey
+  instrument (musical) [n.]: das Instrument, -e
+  instrument (scientific) [n.]: das Gerät, -e
+  look (glance) [n.]: der Blick, -e
+  look (appearance) [n.]: der Look, -s
+  may (to be allowed to) [v.]: dürfen [darf]
+  mind (pay attention to) [v.]: beachten
+  realize [v.]: realisieren  # Avoid duplication of `recognize -> erkennen`
+  respond (with an action or something verbal) [v.]: antworten
+  respond (abstractly) [v.]: reagieren
+  score (in sports) [v.]: punkten
+  score (musical) [n.]: die Partitur, -en
+  score (on an assessment) [n.]: die Punktzahl, -en
+  score (in sports) [n.]: der Spielstand, -̈e
+  screen [n.]: der Bildschirm, -e  # Google Translate uses `den` article
+  secretary (f.) [n.]: die Sekretärin, -nen
+  serve (take on a role) [v.]: dienen
+  serve (a dish) [v.]: servieren
+  sheet (of paper) [n.]: das Blatt, -̈er
+  sheet (bedding) [n.]: das Bettlaken, -
+  site (on the internet) [n.]: die Website, -s
+  succeed [v.]: gelingen
+  tablet [n.]: das Tablett, -s
+  taste [v.]: schmecken
+  tie (fasten) [v.]: binden
+  tie (draw in a competition) [v.]: unentschieden spielen
+  tie (formal wear) [n.]: die Krawatte, -n
+  tie (draw in a competition) [n.]: der Gleichstand, -̈e
+  toy [n.]: der Spielzug, -̈e  # Revisit whether `das Spielzeug` is equally valid
+  track (song on an album) [n.]: der Track, -s
+  track (evidence of prior presence) [n.]: die Spur, -en
+  worry [v.]: sich sorgen
