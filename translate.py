@@ -169,7 +169,8 @@ class Language:
         }
         method = method_map.get(pos, partial(self.translate_from, src="en"))
         # TODO return an object with word, context, POS, etc attrs and use a default formatter class to get the string
-        return method(english).strip()
+        translation = method(english)
+        return re.sub(r"\s+", " ", translation)
 
     def pluralize(self, noun: str) -> str:
         if self.name != "en":
@@ -254,8 +255,6 @@ class German(Language):
         "zer",
     )
 
-    # TODO handle some basic plural rules like -ung and -heit
-
     def _get_noun_translation(self, english: str) -> str:
         """Make sure article is lowercase"""
         translation = super()._get_noun_translation(english)
@@ -316,6 +315,7 @@ class German(Language):
     ) -> Optional[str]:
 
         # Irregulars are the same for all prefixes
+        # TODO `voran` is a valid prefix (combining multiple)
         all_prefixes = "|".join(self.separable_prefixes + self.inseparable_prefixes)
         base_verb = re.sub(f"^({all_prefixes})", "", infinitive_native)
         irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg[self.IRREGULARS_KEY]), None)
@@ -377,6 +377,11 @@ class German(Language):
         return note
 
     def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
+
+        # TODO handle some basic plural rules like -ung and -heit
+        # TODO reject ending if it's >3 (or 4?) characters. I don't think German plural endings get that long
+        # TODO keep mapping of existing endings in memory to reference for compound nouns
+
         if len(plural.split()) != 2:
             print(f"Expected 2 words in German plural, got {plural}")
             return None
