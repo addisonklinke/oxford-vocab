@@ -657,6 +657,7 @@ if __name__ == "__main__":
             if os.path.isfile(split_path):
                 existing = pd.read_csv(split_path)
                 new = pd.concat([existing, new])
+                new = dedupe(new, language.name)
             new.to_csv(split_path, index=False)
     else:
         output.to_csv(base_file + ".csv", index=False)
