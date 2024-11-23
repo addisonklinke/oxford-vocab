@@ -138,6 +138,8 @@ class Language:
         # Replace with manual translations
         new_rows = []
         for (english, pos), translations in self.ambiguous_words.items():
+            if english not in english_word2level:
+                continue  # Doesn't apply to this vocab list
             for note, translation in translations:
                 new_rows.append({
                     "en": english,
