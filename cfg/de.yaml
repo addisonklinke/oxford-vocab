@@ -10,15 +10,29 @@ skip:
   - tomorrow [n.]
   - tonight [n.]
   - yesterday [n.]
+  - mix [n.]
   # Same translation as the adverb
   - electric [adj.]
   - exact [adj.]
   - loud [adv.]
+  - automatic [adj.]
+  - historic [adj.]
+  - indoors [adv.]
+  - obviously [adv.]
+  - properly [adv.]
+  - rare [adj.]
   # More formal noun that doesn't have a different translation
+  - racing [n.]
+  - quotation [n.]
   - mathematics [n.]
   # Already covered by manual translations (with a disambiguating note)
   - plate [n.]
   - ride [n.]
+  # Not used much in English
+  - better [n.]
+  - go [n.]
+  - while [n.]
+  - young [n.]
 irregulars:
   skifahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
@@ -34,6 +48,7 @@ irregulars:
   aussprechen: spricht, sprach, hat gesprochen
   aussteigen: stieg aus, ist ausgestiegen
   anziehen: zog an, ist angezogen
+  aufladen: lädt auf, lud auf, hat aufgeladen
   auskennen: kannt-, hat gekannt
   ausziehen: zog aus, ist ausgezogen
   backen: bäckt, hat gebacken
@@ -89,6 +104,7 @@ irregulars:
   gewinnen: gewann, hat gewonnen
   gießen: goß, hat gegossen
   gleichen: glich, hat geglichen
+  graben: gräbt, grub, hat gegraben
   haben: hat, hatt-
   halten: hält, hielt, hat gehalten
   heißen: hieß, hat geheißen
@@ -277,6 +293,74 @@ plurals:
   das Virus: Viren
   das Web: -en
   das Holz: -̈er
+  das Konto: -s
+  die Leistung: -en
+  der Zusatz: -̈e
+  das Album: -s
+  der Ehrgeiz: -e
+  die Autorität: -en
+  der Glaube: -n
+  die Biegung: -en
+  der Atem: "-"
+  die Atmung: -en
+  die Feier: -n
+  die Brust: -̈e
+  die Konsequenz: -en
+  der Inhalt: -e
+  der Graf: -en
+  der Deal: -s
+  die Abreise: -n
+  die Trommel: -n
+  die Wirtschaft: -en
+  der Rand: -̈er
+  der Aufwand: "-"
+  die Folge: -n
+  der Austausch: -e
+  def Gefallen: "-"
+  die Flagge: -n
+  die Flut: -en
+  def Fluss: -̈e
+  das Volk: -̈e
+  das Fell: -e
+  der Wächter: "-"
+  das Glück: -e
+  der Hass: "-"
+  die Überschrift: -en
+  der Höhepunkt: -e
+  der Horror: "-"
+  die Bedeutung: -en
+  das Tagebuch: -̈er
+  die Führung: -en
+  der Luxus: "-"
+  das Marketing: "-"
+  das Durcheinander: "-"
+  der Umzug: -̈e
+  das Rudel: "-"
+  das Vergnügen: "-"
+  die Hanglung: -en
+  die Politik: -en
+  die Präsentation: -en
+  der Prinz: -en
+  die Immobilie: -n
+  die Reichweite: -n
+  der Verwandter: Verwandte
+  der Respekt: "-"
+  die Verantwortung: -en
+  das Risiko: -s
+  der Sand: -̈e
+  das Drehbuch: -̈er
+  die Sicherheit: -en
+  die Schale: -n
+  der Anblick: -e
+  die Feste: -n
+  das Zeug: -e
+  die Versorgung: -en
+  der Handel: "-"
+  die Wahrheit: -en
+  der Betrachter: "-"
+  die Abstimmung: -en
+  der Wille: -n
+  die Sahne: "-"
 translations:
   become [v.]: werden
   bad (objectively) [adj.]: schlecht
@@ -396,3 +480,64 @@ translations:
   track (song on an album) [n.]: der Track, -s
   track (evidence of prior presence) [n.]: die Spur, -en
   worry [v.]: sich sorgen
+  admit [v.]: zugeben [gibt zu, gab zu, hat zugegeben]
+  announce [v.]: ankündigen
+  approximately [adv.]: etwa, ungefähr
+  balance (physical position) [n.]: das Gleichgewicht, -e
+  balance (sheet, financial) [n.]: die Bilanz, -en
+  balance (positive/negative sum, financial) [n.]: der Saldo, Salden
+  balance (physical position) [v.]: balancieren
+  balance (manage a tradeoff) [v.]: ausgleichen [glich aus, hat ausgeglichen]
+  balance (financial accounts) [v.]: begleichnen [beglich, hat beglichen]
+  base (foundation) [n.]: die Basis, Basen
+  base (bottom of a structure) [n.]: der Sockel, -
+  base (off of) [v.]: basieren
+  bend [v.]: biegen [bog, hat gebogen]
+  board [v.]: einsteigen [stieg ein, ist eingestiegen]
+  branch (of a business) [n.]: die Filiale, -n
+  branch (of a tree) [n.]: der Ast, -̈e
+  campaign (for poltical office) [v.]: Wahlkampf führen
+  charge (electrical) [n.]: die Ladung, -en
+  charge (payment for a service) [n.]: die Gebühr, -en
+  charge (for a service) [v.]: berechnen
+  charge (an electronic device) [v.]: aufladen
+  charge (as a suspect) [v.]: beschuldigen
+  charge (officially with a crime, by the state): anklagen
+  commit (to a course of action) [v.]: sich verpflichten
+  commit (a crime) [v.]: begehen [beging, hat begangen]
+  conclude [v.]: abschließen [schloss ab, hat abgeschlossen]
+  custom (tradition) [n.]: der Brauch, -̈e
+  equal [v.]: gleichen [glich, hat geglichen]
+  face [v.]: gegenübertreten [tritt gegenüber, trat gegenüber, ist gegenübergetreten]
+  fear [v.]: fürchten
+  graduate [v.]: graduieren
+  obtain (a degree) [v.]: erlangen
+  reichen [v.]: reichen
+  head (a ball in sports) [v.]: köpfen
+  head (be in charge of) [v.]: leiten
+  head (in a direction) [v.]: steuern
+  kind [adj.]: freundlich
+  mess up [v.]: vermasseln
+  ought (should) [v.]: sollen [soll]
+  outdoor [adj.]: außben gelegen
+  pipe (for smoking) [n.]: die Pfeife, -n
+  pipe (for liquids) [n.]: das Rohr, -e
+  remote (far away, primitive) [adj.]: abgelegen
+  retire (end a career) [v.]: in Rente gehen
+  set (musical performance) [n.]: das Set, -s
+  set (collection of items) [n.]: die Reihe, -n
+  set (portion of a game) [n.]: der Satz, -̈e
+  spot (place) [n.]: der Ort, -e
+  spot (circular pattern) [n.]: der Punkt, -e
+  stick (adhere) [v.]: kleben
+  stick (to, abide by) [v.]: sich halten
+  stick (get stuck) [v.]: klemmen
+  string (programming data type) [n.]: die Zeichenfolge, -n
+  string (of a musical instrument) [n.]: die Saite, -n
+  string (cord, cable) [n.]: die Schnur, -̈e
+  string (thread, filament) [n.]: der Faden, -̈
+  suit [v.]: passen
+  tour [v.]: bereisen
+  tube [n.]: der Schlauch, -̈e  # `das Rohr` also works, but is already used for `pipe`
+  unfair [adj.]: unlauter
+  youth [n.]: die Jugendliche [pl.]
