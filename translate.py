@@ -609,6 +609,8 @@ def translate(
             break
         try:
             translation = language.get_translation(row.en, row.pos)
+        except KeyboardInterrupt:
+            break
         except:
             print(f"Failed on row {i}: {row.en}")
             traceback.print_exc()
