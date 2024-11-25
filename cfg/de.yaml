@@ -4,7 +4,9 @@ disambiguations:
   clean: thoroughly
   dress [v.]: put on clothes
 skip:
-  - might [v.]  # Just the past-tense of may, which doesn't need to be a separate entry
+  # Past tense of another verb
+  - might [v.]
+  - found [v.]
   # These are almost always adverbs, so duplicating with the noun article does't add much for studying
   - today [n.]
   - tomorrow [n.]
@@ -21,18 +23,37 @@ skip:
   - obviously [adv.]
   - properly [adv.]
   - rare [adj.]
+  - deliberate [adj.]
+  - intially [adv.]
+  - rapidly [adv.]
+  - instantly [adv.]
+  - remarkably [adv.]
+  - subsequently [adv.]
+  - sufficiently [adv.]
   # More formal noun that doesn't have a different translation
   - racing [n.]
   - quotation [n.]
   - mathematics [n.]
+  - hunting [n.]
   # Already covered by manual translations (with a disambiguating note)
   - plate [n.]
   - ride [n.]
+  - shall [v.]  # `sollen` is already covered under `ought`
+  # Same as other gendered variations
+  - spokesperson [n.]
   # Not used much in English
   - better [n.]
   - go [n.]
   - while [n.]
   - young [n.]
+  - back [v.]
+  - term [adj.]
+  - mass [adj.]
+  - motor [adj.]
+  - subject [adj.]
+  - thoroughly [adv.]
+  # Parsing errors
+  - rsum [n.]  # Should be `résumé` but non-ASCII characters are stripped
 irregulars:
   skifahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
@@ -104,6 +125,7 @@ irregulars:
   gewinnen: gewann, hat gewonnen
   gießen: goß, hat gegossen
   gleichen: glich, hat geglichen
+  gleiten: glitt, ist geglitten
   graben: gräbt, grub, hat gegraben
   haben: hat, hatt-
   halten: hält, hielt, hat gehalten
@@ -191,6 +213,21 @@ irregulars:
   wissen: weiß, wusst-, hat gewusst
   wollen: will
   ziehen: zog, hat gezogen
+  greifen: griff, hat gegriffen
+  schmelzen: schmilzt, schmolz, ist geschmolzen
+  widersprechen: widerspricht, widersprach, hat widersprochen
+  widerstehen: widerstand, hat widerstanden
+  loswerden: wird los, wurde los, ist losgeworden
+  reiben: rieb, hat gerieben
+  zerreißen: zerriss, hat zerrissen
+  unterbringen: unterbracht-, hat untergebracht
+  gestehen: gestand, hat gestanden
+  verderben: verdirbt, verdarb, ist verdorben
+  das Etikett: -en
+  das Territorium: Territorien
+  der Zeitpunkt: -e
+  das Merkmal: -e
+  das Visum: Visen
 plurals:
   der Apfel: -̈
   die Bar: -s
@@ -361,6 +398,141 @@ plurals:
   die Abstimmung: -en
   der Wille: -n
   die Sahne: "-"
+  der Vormarsch: -̈e
+  die Affäre: -n
+  die Hilfe: -n
+  das Flugzeug: -e
+  das Jubiläum: Jubiläen
+  der Appell: -e
+  der Verein: -e
+  die Schuld: -en
+  die Bindung: -en
+  der Haufen: "-"
+  der Krebs: -e
+  die Gefangennahme: "-"
+  die Bestzung: -en
+  der Haken: "-"
+  das Merkmal: -e
+  der Chef: -s
+  der Abschluss: -̈e
+  der Zusammenbruch: -̈e
+  der Komfort: "-"
+  das Engagement: -s
+  das Komitee: -s
+  die Komponente: -n
+  die Sorge: -n
+  das Vertrauen: "-"
+  der Bau: -e
+  der Kreis: -e
+  der Mut: "-"
+  die Schöpfung: -en
+  das Geschöpf: -e
+  das Kriterium: Kriterien
+  die Heilung: -en
+  die Niedergang: -̈e
+  die Abnahme: -n
+  die Verteidigung: -en
+  die Nachfrage: -n
+  die Anzeige: -n
+  die Abteilung: -en
+  die Ausgabe: -n
+  das Anwesen: "-"
+  die Exekutive: -n
+  die Anlage: -n
+  das Futter: "-"
+  das Feedback: -s
+  der Befund: -e
+  die Firma: Firmen
+  die Lösung: -en
+  das Hoch: -s
+  die Miete: -n
+  der Halt: -e
+  die Ehre: -n
+  der Humor: -e
+  der Schmerz: -en
+  die Fantasie: -n
+  die Einsicht: -en
+  die Liga: Ligen
+  das Darlehen: "-"
+  das Medium: Medien
+  das Minimum: Minima
+  das Nationale: "-"
+  die Opposition: -en
+  das Tempo: -s
+  das Panel: -s
+  der Durchgang: -̈e
+  das Spielfeld: -er
+  das Plus: "-"
+  das Lob: -e
+  der Schutz: -e
+  der Kauf: -̈e
+  das Bedauern: "-"
+  der Ruf: -e
+  der Rhythmus: Rhythmen
+  der Aufstieg: -e
+  der Ansturm: -̈e
+  die Skala: -s
+  der Ablauf: -̈e
+  der Schatten: "-"
+  das Tierheim: -e
+  der Schock: -s
+  der Hang: -̈e
+  der Prozess: -e
+  das Universum: Universen
+  die Gewalt: -en
+  der Lohn: -̈e
+  der Analytiker: "-"
+  der Antragsteller: "-"
+  der Vermögenswert: -e
+  das Angebot: -e
+  der Auftrieb: -e
+  der Ziegelstein: -e
+  der Sender: "-"
+  das Geld: -er
+  die Kabine: -n
+  das Schloss: -̈er
+  die Jagd: -en
+  der Jubel: "-"
+  der Kommandant: -en
+  der Polizist: -en
+  das Unternehmen: "-"
+  das Handwerk: -e
+  das Stichwort: -̈er
+  der Cent: -s
+  das Reich: -e
+  der Feuerwehrmann: -̈er
+  das Feuerwerk: -e
+  der Geschmack: -̈e
+  der Rahmen: "-"
+  der Betrug: -̈e
+  der Globus: -se
+  das Gewächshaus: -̈er
+  das Hauptquartier: -e
+  der Ausweis: -e
+  der Index: -e
+  die Angabe: -n
+  die Eingabe: -n
+  die Spur: -en
+  das Objektiv: -e
+  die Lyrik: "-"
+  die Marge: -n
+  der Mechaniker: "-"
+  der Mechanismus: Mechanismen
+  der Bergmann: -̈er
+  der Modus: Modi
+  der Mythos: Mythen
+  die Teilnahme: -n
+  der Kollege: -n
+  das Mitleid: "-"
+  der Anteil: -e
+  der Ruhestand: -̈e
+  der Raub: -e
+  die Romantik: "-"
+  das Szenario: -s
+  das Stipednium: Stipendien
+  der Bürgersteig: -e
+  der Schlaganfall: -̈e
+  der Terror: "-"
 translations:
   become [v.]: werden
   bad (objectively) [adj.]: schlecht
@@ -541,3 +713,59 @@ translations:
   tube [n.]: der Schlauch, -̈e  # `das Rohr` also works, but is already used for `pipe`
   unfair [adj.]: unlauter
   youth [n.]: die Jugendliche [pl.]
+  account [v.]: Rechenschaft ablegen
+  appeal (legally) [v.]: Berufung einlegen
+  appeal (to be of interest) [v.]: appellieren
+  beat (musical tempo) [n.]: der Schlag, -̈e
+  beat (background of a song) [n.]: der Beat, -s
+  blame [v.]: tadeln
+  chair (to preside over) [v.]: Vorsitzende(r) sein [+ gen.]
+  commission [v.]: beauftragen
+  conflict [v.]: sich widersprechen [widerspricht, widersprach, hat widersprochen]
+  cure [v.]: heilen [ist]
+  current (electric, metaphorical, or liquid) [n.]: der Strom, -̈e
+  detail [v.]: genau beschreiben [beschrieb, hat beschrieben]
+  disk (flat round object) [n.]: die Scheibe, -n
+  disk (electronic) [n.]: die Platte, -n
+  disk (hard drive) [n.]: die Festplatte, -n
+  elerly [adj.]: älter
+  faith (religious) [n.]: die Religion, -en
+  faith (trust) [n.]: der Glauben, -
+  fund (entity to control assets) [n.]: der Fonds, -s
+  fund (incoming money) [n.]: das Geldmittel, -
+  handle (manage) [v.]: behandeln
+  handle (operate) [v.]: bedienen
+  hell [n.]: die Hölle, -n
+  illustrate [v.]: verdeutlichen
+  insist (on something) [v.]: auf + [acc.] bestehen [bestand, hat bestanden]
+  modify [v.]: modifizieren
+  organ (musical) [n.]: die Orgel, -n
+  organ (body part) [n.]: das Organ, -e
+  outline [v.]: umreißen [umriss, hat umrissen]
+  pace (peform in a sustainable way) [v.]: seine Kräfte einteilen
+  picture (to be shown) [v.]: darstellen
+  positive [n.]: das Positiv, -e  # `der Positiv` is also listed on Netzverb, hard to tell which is more common
+  power [v.]: antreiben [trieb an, hat angetrieben]
+  price [v.]: bewerten
+  purchase [v.]: erwerben  # `kaufen` is also translated, but is already used for `buy`
+  schedule (especially to agree upon) [v.]: festlegen  # `planen` also works
+  seat [v.]: hinsetzen
+  sector [n.]: die Branche, -n  # Google gets article wrong
+  settle (establish a population) [v.]: besiedeln
+  settle (resolve) [v.]: erledigen
+  settle (clear a legal matter, i.e. debts) [v.]: begleichen
+  speed [v.]: zu schnell fahren [fährt, fuhr, ist gefahren]
+  stand [n.]: der Stand, -̈e
+  stock (company shares) [n.]: die Aktie, -n
+  time (measure duration) [v.]: messen
+  time (align with a schedule) [v.]: timen
+  title [v.]: betiteln
+  trouble [v.]: belästigen
+  wrong (injustice) [n.]: das Unrecht, -e
+  acre [n.]: der Acker, -
+  bug (insect) [n.]: die Wanze, -n
+  differ [v.]: abweichen
+  divorce [v.]: sich scheiden [schied, ist geschieden]
+  firm [adj.]: fest
+  resume [n.]: der Lebenslauf, -̈e
+  sibling [n.]: der Geschwister, -
