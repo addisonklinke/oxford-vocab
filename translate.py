@@ -241,6 +241,7 @@ class German(Language):
         "an",
         "auf",
         "aus",
+        "bei",
         "ein",
         "mit",
         "nach",
@@ -251,9 +252,9 @@ class German(Language):
     inseparable_prefixes = (
         "be",
         "emp",
-        "ent",
+        "ent",  # FIXME not working for entlassen
         "er",
-        "ver",
+        "ver",  # FIXME not working for vergeben
         "zer",
     )
 
