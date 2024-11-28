@@ -30,6 +30,8 @@ skip:
   - remarkably [adv.]
   - subsequently [adv.]
   - sufficiently [adv.]
+  - ironically [adv.]
+  - partially [adv.]
   # More formal noun that doesn't have a different translation
   - racing [n.]
   - quotation [n.]
@@ -52,8 +54,18 @@ skip:
   - motor [adj.]
   - subject [adj.]
   - thoroughly [adv.]
+  - behalf [n.]  # ìm Namen von` would be the more idiomatic phrase, not a noun
+  - halt [n.]
+  - ranking [v.]
+  - retirement [v.]
+  - roster [v.]
+  - transparency [n.]
+  # Doesn't have a direct translation
+  - sophomore [n.]
   # Parsing errors
   - rsum [n.]  # Should be `résumé` but non-ASCII characters are stripped
+  # Translation errors
+  - latter [n.]
 irregulars:
   skifahren: fährt Ski, fuhr Ski, ist Ski gefahren
   abfahren: fährt ab, fuhr ab, ist abgefahren
@@ -117,8 +129,10 @@ irregulars:
   fernsehen: sieht fern, sah fern, hat gesehen
   finden: fand, hat gefunden
   fliegen: flog, ist gefliegen
+  fliehen: floh, ist geflohen
   flieβen: floss, ist geflossen
   geben: gibt, gab, hat gegeben
+  gedeihen: gedieh, ist gediehen
   gefallen: gefällt, gefiel, hat gefallen
   gehen: ging, ist gegangen
   genießen: genoss, hat genossen
@@ -165,6 +179,7 @@ irregulars:
   schweigen: schwieg, hat geschwiegen
   schwimmen: schwamm, ist geschwommen
   schwinden: schwand, ist geschwunden
+  schwingen: schwang, ist geschwungen
   sehen: sieht, sah, hat gesehen
   sein: ist, war, ist gewesen
   singen: sang, hat gesungen
@@ -228,6 +243,10 @@ irregulars:
   der Zeitpunkt: -e
   das Merkmal: -e
   das Visum: Visen
+  fortfahren: fährt fort, fuhr fort, ist fortgefahren
+  überspringen: übersprang, hat übersprungen
+  anschwellen: schwillt an, schwoll an, ist angeschwollen
+  festziehen: zog fest, hat festgezogen
 plurals:
   der Apfel: -̈
   die Bar: -s
@@ -533,6 +552,128 @@ plurals:
   der Bürgersteig: -e
   der Schlaganfall: -̈e
   der Terror: "-"
+  die Akzeptanz: "-"
+  die Übernahme: -n
+  die Aufnahme: -n
+  der Anwalt: -̈e
+  der Adjutant: -en
+  das Gerät: -e
+  der Appetit: -e
+  die Arena: Arenen
+  der Anspruch: -̈e
+  der Angriff: -e
+  die Kulisse: -n
+  der Rückhalt: -e
+  der Konkurs: -e
+  das Biest: -er
+  die Biographie: -n
+  der Bonus: -se
+  das Breitband: -̈er
+  die Last: -en
+  das Kabinett: -e
+  der Wagen: "-"
+  die Vorsicht: "-"
+  die Charta: -s
+  der Kreislauf: -̈e
+  der Zusammenstoß: -̈e
+  die Zusammenarbeit: "-"
+  der Begleiter: "-"
+  der Anwärter: "-"
+  das Gegenteil: -e
+  das Kupfer: "-"
+  der Putsch: -e
+  die Neugier: "-"
+  der Defekt: -e
+  der Stellvertreter: "-"
+  der Absteig: -e
+  das Dilemma: -s
+  der Streit: -e
+  die Dosis: Dosen
+  das Verdienst: -e
+  das Unterfangen: "-"
+  der Überschuss: -̈e
+  das Exil: -e
+  der Sprengstoff: -e
+  das Kunststück: -e
+  die Passform: "-"
+  der Fehler: "-"
+  der Neuling: -e
+  der Darm: -̈e
+  die Heimat: -en
+  die Hupe: -n
+  die Bildsprache: -n
+  die Einnahme: -n
+  der Eingriff: -e
+  das Inventar: -e
+  der Rasen: "-"
+  das Erbe: "-"
+  der Gesetzgeber: "-"
+  das Glied: -er
+  die Größe: -n
+  das Festland: -̈er
+  die Wartung: -en
+  das Denkmal: -̈er
+  der Kaufmann: -̈er
+  die Methodik: -en
+  der Bergau: "-"
+  das Ministerium: Ministerien
+  das Elend: "-"
+  der Kandidat: -en
+  der Unsinn: "-"
+  das Kinderzimmer: "-"
+  das Geschehen: "-"
+  der Nachwuchs: ~
+  der Optimismus: ~
+  der Ausblick: -e
+  der Patron: -e
+  die Spitze: -n
+  die Pipeline: -s
+  der Praktiker: "-"
+  der Präzedenzfall: -̈e
+  die Prämisse: -n
+  das Verfahren: "-"
+  der Erlös: ~
+  die Anklage: -n
+  der Puls: -e
+  der Überfall: -̈e
+  das Ranking: -s
+  der Wiederaufbau: "-"
+  das Referendum: Referenden
+  das Spiegelbild: -er
+  die Zuflucht: -en
+  der Regler: "-"
+  der Ersatz: -̈e
+  der Rückstand: -̈e
+  der Aufruhr: -e
+  der Umfang: -̈e
+  die Sensibilität: "-"
+  die Spanne: -n
+  das Spektakel: "-"
+  die Kugel: -n
+  der Spin: -s
+  die Wirbelsäule: -n
+  das Spektrum: Spektren
+  der Kader: "-"
+  der Pfahl: -̈e
+  der Stamm: -̈e
+  der Zuschuss: -̈e
+  der Verdacht: -̈e
+  die Synthese: -n
+  die Theologie: -n
+  die Schwelle: -n
+  die Maut: -en
+  die Folter: -n
+  der Weg: -e
+  das Trauma: Traumen
+  die Hommage: -n
+  der Unterricht: ~d
+  das Dienstprogramm: -e
+  das Schiff: -e
+  das Lager: -̈
+  das Unkraut: -̈er
+  der Witz: -e
+  der Rückzug: -̈e
+  das Training: -s
 translations:
   become [v.]: werden
   bad (objectively) [adj.]: schlecht
@@ -686,8 +827,7 @@ translations:
   obtain (a degree) [v.]: erlangen
   reichen [v.]: reichen
   head (a ball in sports) [v.]: köpfen
-  head (be in charge of) [v.]: leiten
-  head (in a direction) [v.]: steuern
+  head (be in charge of) [v.]: leiten  # steuern better translated as steer
   kind [adj.]: freundlich
   mess up [v.]: vermasseln
   ought (should) [v.]: sollen [soll]
@@ -706,8 +846,7 @@ translations:
   stick (get stuck) [v.]: klemmen
   string (programming data type) [n.]: die Zeichenfolge, -n
   string (of a musical instrument) [n.]: die Saite, -n
-  string (cord, cable) [n.]: die Schnur, -̈e
-  string (thread, filament) [n.]: der Faden, -̈
+  string (cord, cable) [n.]: die Schnur, -̈e  # Faden used for thread
   suit [v.]: passen
   tour [v.]: bereisen
   tube [n.]: der Schlauch, -̈e  # `das Rohr` also works, but is already used for `pipe`
@@ -769,3 +908,43 @@ translations:
   firm [adj.]: fest
   resume [n.]: der Lebenslauf, -̈e
   sibling [n.]: der Geschwister, -
+  blessing [n.]: die Segnung, -en
+  compromise (reach an agreement) [v.]: einen Kompromiss schließen [schloss, hat geschlossen]
+  compromise (reduce trust in) [v.]: beeinträchtigen
+  compromise (put at risk) [v.]: gefährden
+  constitutional [adj.]: verfassungsrechtlich
+  defy [v.]: trotzen
+  drain [v.]: entleeren
+  drift [v.]: abdriften
+  fine (monetary penalty) [n.]: das Bußgeld, -er
+  forge (create a fake) [v.]: fälschen
+  forge (form out of metal) [v.]: formen
+  gear (mechanical) [n.]: das Getriebe, -
+  gear (equipment) [n.]: die Ausrüstung, -en
+  imminent [adj.]: bevorstehend
+  indulge [v.]: verwöhnen
+  interfere (get involved in) [v.]: sich einmischen
+  interfere (inhibit) [v.]: beeinträchtigen  # eingreifen covered under intervene
+  lobby [v.]: beeinflussen
+  meantime [n.]: die Zwischenzeit, -en
+  net (after deductions) [adj.]: netto
+  notably [adv.]: insbesondere
+  obsess [v.]: verfolgen
+  opt [v.]: optieren
+  persist [v.]: bestehen [bestand, hat bestanden]
+  pioneer [v.]: Pionierarbeit leisten
+  pole (rod) [n.]: die Stange, -n
+  pole (geographic, magnetic) [n.]: der Pol, -e
+  prevail [v.]: herrschen  # `sich durchsetzen` used for enforce
+  prosecute [v.]: verfolgen
+  rally (gather) [v.]: sich versammeln
+  rally (rebound) [v.]: sich erholen
+  shrug [v.]: zucken
+  spotlight (center of attention) [n.]: der Mittelpunkt, -e
+  spotlight (lighting) [n.]: der Strahler, -
+  thread (conversation) [n.]: der Thread
+  thread (sewing) [n.]: der Faden, -̈
+  top (exceed) [v.]: übertreffen [übertrifft, übertraf, hat übertroffen]
+  top (cap off, crown) [v.]: krönen
+  vacuum [n.]: der Staubsauger, -
+  wrothwhile [adj.]: lohnenswert
