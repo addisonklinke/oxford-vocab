@@ -91,6 +91,7 @@ class Language:
             plural = en.translate_to(en.pluralize(english), dest=self.name)
             ending = self.extract_plural_ending(translation, plural)
         if ending:
+            # TODO add distinction for plural only nouns (currently in YAML as ~)
             translation = translation + ", " + ending
         return translation
 
@@ -237,14 +238,14 @@ class German(Language):
 
     # https://coffeebreaklanguages.com/2024/06/making-sense-of-german-separable-verbs-a-guide-for-learners/
     separable_prefixes = (
-        "ab",
-        "an",
-        "auf",
+        "ab",  # FIXME abrufen
+        "an",  # FIXME not working for anstreben, angreifen
+        "auf",  # FIXME aufrufen
         "aus",
         "bei",
         "ein",
         "mit",
-        "nach",
+        "nach",  # But this works for nachkommen
         "um",
         "vor",
         "zu",
@@ -253,8 +254,8 @@ class German(Language):
         "be",
         "emp",
         "ent",  # FIXME not working for entlassen
-        "er",
-        "ver",  # FIXME not working for vergeben
+        "er",   # FIXME not working for ernennen, erfinden, ergreifen, ergeben
+        "ver",  # FIXME not working for vergeben, verbergen
         "zer",
     )
 
