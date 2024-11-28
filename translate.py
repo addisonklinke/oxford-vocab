@@ -382,10 +382,16 @@ class German(Language):
 
     def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
 
-        # TODO handle some basic plural rules like -ung and -heit
         # TODO reject ending if it's >3 (or 4?) characters. I don't think German plural endings get that long
         # TODO keep mapping of existing endings in memory to reference for compound nouns
+        # Enforce basic rules
+        singular_article, singular_noun = singular.split()
+        if singular_article == "die":
+            en_endings = ("ung", "heit", "keit", "tion", "sion")
+            if any(singular_noun.endswith(e) for e in en_endings):
+                return "-en"
 
+        # Try to infer generic cases
         if len(plural.split()) != 2:
             print(f"Expected 2 words in German plural, got {plural}")
             return None
@@ -393,7 +399,6 @@ class German(Language):
         if article != "die":
             print(f"Plural German article should always be `die`, got {plural}")
             return None
-        singular_noun = singular.split()[-1]
         if singular_noun in plural_noun:
             ending = plural_noun.replace(singular_noun, "-")
         else:
