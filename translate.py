@@ -677,7 +677,7 @@ class FlashCardBuilder:
             if limit and i > limit:
                 break
             try:
-                translation = language.get_translation(word)
+                translation = self.dest.get_translation(word)
             except:
                 print(f"Failed on row {i}: {word.word}")
                 traceback.print_exc()
