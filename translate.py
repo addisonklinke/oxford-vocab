@@ -619,10 +619,11 @@ class FlashcardSet:
 
 class FlashCardBuilder:
 
-    def __init__(self, words: List[Word], dest: Language, limit: Optional[int] = None) -> None:
+    def __init__(self, words: List[Word], dest: Language, limit: Optional[int] = None, strict: bool = False) -> None:
         self.words = words
         self.dest = dest
         self.limit = limit
+        self.strict = strict
 
     def _dedupe(self, df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
         """Remove duplicate vocab entries"""
@@ -696,6 +697,8 @@ class FlashCardBuilder:
             try:
                 translation = self.dest.get_translation(word)
             except:
+                if self.strict:
+                    raise
                 print(f"Failed on row {i}: {word.word}")
                 traceback.print_exc()
                 translation = None
@@ -754,6 +757,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--limit", type=int, help="Limit the number of rows translated")
     parser.add_argument("-p", "--pdf_path", type=str, required=True, help="Path to downloaded PDF")
     parser.add_argument("-s", "--split", type=str, choices=("level", "pos"), help="Save separate CSVs")
+    parser.add_argument("--strict", action="store_true", help="Raise exceptions on translation failures")
     args = parser.parse_args()
 
     # TODO report percent success rate at each step (PDF to text, text to table, table to translation)
@@ -763,5 +767,6 @@ if __name__ == "__main__":
         pdf_path=args.pdf_path,
         dest=foreign_language_map[args.dst],
         limit=args.limit,
+        strict=args.strict,
     )
     builder.to_csv(base_file="flashcards", split=args.split)
