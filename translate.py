@@ -770,4 +770,5 @@ if __name__ == "__main__":
         limit=args.limit,
         strict=args.strict,
     )
-    builder.to_csv(base_file="flashcards", split=args.split)
+    base_file = "".join(args.pdf_path.split(".")[:-1])
+    builder.to_csv(base_file, split=args.split)
