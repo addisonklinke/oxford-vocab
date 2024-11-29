@@ -32,6 +32,40 @@ except OSError as exc:
 POS_CHARS = "nvadjcopredt"
 
 
+class PartOfSpeech(StrEnum):
+    NOUN = "n"
+    VERB = "v"
+    ADJECTIVE = "adj"
+    ADVERB = "adv"
+    CONJUNCTION = "conj"
+    PREPOSITION = "prep"
+    DETERMINER = "det"
+
+
+@dataclass
+class Word:
+    """A word and its associated metadata for a vocabulary list"""
+
+    word: str
+    pos: PartOfSpeech
+    plural_ending: Optional[str] = None
+    note: Optional[str] = None
+    level: Optional[str] = None
+
+    def format(self, word_only: bool = False) -> str:
+        """Formatted word (note) [pos.]"""
+
+        # TODO add distinction for plural only nouns (currently in YAML as ~)
+
+        out = self.word
+        if word_only:
+            return out
+        if self.note:
+            out += f" ({self.note})"
+        out += f" [{self.pos}.]"
+        return out
+
+
 class Language:
     """Base class for handling translations
 
@@ -527,40 +561,6 @@ class OxfordPdf:
                 f" ({errors/len(self.lines) * 100:.2f}%)"
             )
         return pd.DataFrame(rows, columns=["en", "pos", "level"])
-
-
-class PartOfSpeech(StrEnum):
-    NOUN = "n"
-    VERB = "v"
-    ADJECTIVE = "adj"
-    ADVERB = "adv"
-    CONJUNCTION = "conj"
-    PREPOSITION = "prep"
-    DETERMINER = "det"
-
-
-@dataclass
-class Word:
-    """A word and its associated metadata for a vocabulary list"""
-
-    word: str
-    pos: PartOfSpeech
-    plural_ending: Optional[str] = None
-    note: Optional[str] = None
-    level: Optional[str] = None
-
-    def format(self, word_only: bool = False) -> str:
-        """Formatted word (note) [pos.]"""
-
-        # TODO add distinction for plural only nouns (currently in YAML as ~)
-
-        out = self.word
-        if word_only:
-            return out
-        if self.note:
-            out += f" ({self.note})"
-        out += f" [{self.pos}.]"
-        return out
 
 
 @dataclass
