@@ -29,17 +29,18 @@ try:
     nlp = spacy.load("en_core_web_trf")  # Recommended for best accuracy by https://spacy.io/models
 except OSError as exc:
     raise RuntimeError("Missing spaCy model: run `python -m spacy download <model_name>` to fix") from exc
-POS_CHARS = "nvadjcopredt"
+POS_CHARS = "nvadjcopredt"  # TODO make this a dynamic property of PartOfSpeech
 
 # TODO CI project template (orchestrated with Earthly running on GitHub Actions)
 #  Static type checks (enforce all objects have type annotations)
 #  Linting (complexity analysis)
 #  Code formatting (ordering of methods, internal methods, named parameters)
-#  Import sorting
+#  Import sorting, grouping, and relative usage
 #  Unit tests (coverage)
 #  Submodule organization (no utils/common)
 #  PyEnv dependency management
 #  Deployment (automated semver based on commit messages, package and upload to PyPI)
+#  Open GitHub issues for TODOs and FIXMEs
 
 
 class PartOfSpeech(StrEnum):
@@ -50,6 +51,7 @@ class PartOfSpeech(StrEnum):
     CONJUNCTION = "conj"
     PREPOSITION = "prep"
     DETERMINER = "det"
+    PRONOUN = "pron"
 
 
 @dataclass
