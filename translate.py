@@ -81,7 +81,7 @@ class Language:
             if note:
                 self.ambiguous_words[(english_word, pos)].append((note, translation))
 
-    def _get_noun_translation(self, english: str) -> str:
+    def _get_noun_translation(self, english: str) -> Word:
         # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
         if self.noun_article:
             english = f"{self.noun_article} {english}"
@@ -91,12 +91,9 @@ class Language:
         else:
             plural = en.translate_to(en.pluralize(english), dest=self.name)
             ending = self.extract_plural_ending(translation, plural)
-        if ending:
-            # TODO add distinction for plural only nouns (currently in YAML as ~)
-            translation = translation + ", " + ending
-        return translation
+        return Word(translation, PartOfSpeech.NOUN, plural_ending=ending)
 
-    def _get_verb_translation(self, english_infinitive: str) -> str:
+    def _get_verb_translation(self, english_infinitive: str) -> Word:
         # FIXME returning a lot of capitalized words
         translated_infinitive_prefix = en.translate_to("to", dest=self.name).lower()
         translation = en.translate_to(
@@ -108,9 +105,7 @@ class Language:
             note = self.cfg[self.IRREGULARS_KEY][translation]
         else:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
-        if note:
-            translation = translation + " [" + note + "]"
-        return translation
+        return Word(translation, PartOfSpeech.VERB, note=note)
 
     def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
         """Return verb's conjugation in this language"""
@@ -160,23 +155,23 @@ class Language:
         """Subclasses can define language specific behavior. None tells consumers to ignore"""
         return None
 
-    def get_translation(self, english: str, pos: "PartOfSpeech") -> Optional[str]:
+    def get_translation(self, word: Word) -> Optional[Word]:
         """Translate a word from English into this language"""
 
         # TODO parameterize the source language so this can be used for any language pair
 
-        if f"{english} [{pos}.]" in self.cfg[self.SKIP_KEY]:
+        if word in self.cfg[self.SKIP_KEY]:
             return None
-        manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(english)
+        manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(word)
         if manual_translation:
             return manual_translation
         method_map = {
             PartOfSpeech.NOUN: self._get_noun_translation,
             PartOfSpeech.VERB: self._get_verb_translation,
         }
-        method = method_map.get(pos, partial(self.translate_from, src="en"))
+        method = method_map.get(word.pos, partial(self.translate_from, src="en"))
         # TODO return an object with word, context, POS, etc attrs and use a default formatter class to get the string
-        translation = method(english)
+        translation = method(word.word)
         return re.sub(r"\s+", " ", translation)
 
     def pluralize(self, noun: str) -> str:
@@ -203,7 +198,7 @@ class English(Language):
         """Set default to present tense 3rd person singular"""
         return super().conjugate(infinitive, tense, mood, person)
 
-    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+    def get_translation(self, english: Word) -> Word:
         return english
 
     @staticmethod
@@ -415,10 +410,10 @@ class German(Language):
                 ending = None
         return ending
 
-    def get_translation(self, english: str, pos: "PartOfSpeech") -> str:
+    def get_translation(self, word: Word) -> Word:
         """Only nouns should be capitalized in German"""
-        translation = super().get_translation(english, pos)
-        if pos != PartOfSpeech.NOUN:
+        translation = super().get_translation(word)
+        if word.pos != PartOfSpeech.NOUN:
             return translation.lower()
         return translation
 
@@ -593,7 +588,7 @@ class FlashCardBuilder:
     def build(self) -> FlashcardSet:
         flashcards = []
         for word in self.words:
-            translation = self.dest.get_translation(word.word, word.pos)
+            translation = self.dest.get_translation(word)
             flashcards.append(Flashcard(front=word, back=Word(word=translation, pos=word.pos)))
         return flashcards
 
