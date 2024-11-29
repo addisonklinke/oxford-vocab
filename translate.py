@@ -545,11 +545,15 @@ class Word:
 
     word: str
     pos: PartOfSpeech
+    plural_ending: Optional[str] = None
     note: Optional[str] = None
     level: Optional[str] = None
 
     def format(self, word_only: bool = False) -> str:
         """Formatted word (note) [pos.]"""
+
+        # TODO add distinction for plural only nouns (currently in YAML as ~)
+
         out = self.word
         if word_only:
             return out
@@ -558,9 +562,6 @@ class Word:
         out += f" [{self.pos}.]"
         return out
 
-    def _avg_edit_dist_within_thres(group) -> bool:
-        if len(group) == 1:
-            return False
 
 @dataclass
 class Flashcard:
@@ -575,6 +576,11 @@ class FlashcardSet:
     flashcards: List[Flashcard]
 
     def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns
+        # Include POS in English to disambiguate on flashcards
+        df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
+
+        # Reorder columns for easier copy-paste to flashcard services like Quizlet
+        df = df[["en", language.name, "level", "pos"]]
         rows = [[f.front.format(), f.back.format(word_only=True)] for f in self.flashcards]
         return pd.DataFrame(rows, columns=["front", "back"])
 
@@ -593,8 +599,8 @@ class FlashCardBuilder:
         return flashcards
 
     def postprocess(self) -> None:
-        """Apply any necessary transformations to the flashcards"""
-        raise NotImplementedError
+        df = language.disambiguate(df)
+        df = self.dedupe(df, language.name)
 
     def export(self, base_file: str, split: Optional[str] = None) -> None:
         df = pd.DataFrame([[f.front, f.back] for f in self.build()], columns=["Front", "Back"])
@@ -616,52 +622,96 @@ class FlashCardBuilder:
             words.append(Word(word=row.en, pos=PartOfSpeech(row.pos), level=row.level))
         return cls(words, dest)
 
-    print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
-    df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
-    return df
 
+@dataclass
+class Translator:
 
-def translate(
-    pdf_path: str,
-    language: Language,
-    limit: Optional[int] = None,
-) -> pd.DataFrame:
-    """Translate parsed output of PDF into destination language"""
+    words: List[Word]
+    dest: Language
+    src: Language = en
 
-    # Convert PDF into dataframe
-    oxford = OxfordPdf(pdf_path)
-    df = oxford.to_df()
+    def dedupe(self, df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
+        """Remove duplicate vocab entries"""
 
-    # Get translations
-    translated = []
-    total = len(df)
-    for i, row in df.iterrows():
-        if limit and i > limit:
-            break
-        try:
-            translation = language.get_translation(row.en, row.pos)
-        except KeyboardInterrupt:
-            break
-        except:
-            print(f"Failed on row {i}: {row.en}")
-            traceback.print_exc()
-            translation = None
-        translated.append(translation)
-        print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
+        # Obvious ones where the same English word (under different POS) received the same translation
+        before = len(df)
+        df = df.drop_duplicates(subset=["en", dest])
+        print(f"Removed {before - len(df)} exact duplicates")
 
-    # Fill nulls when `limit` is set
-    df[language.name] = translated + [None] * (len(df) - len(translated))
+        # Other times the translations might use different articles but are otherwise the same
+        # Group by English and use edit distance to find similar translations
+        # Calculate the average edit distance across all translations within a group
+        # Then assign boolean column and use later for filtering
+        # This is most often nouns and adjectives that are legitimate so filtering is off by default
+        # a reasonable threshold seems to be 0.5 if you'd like to turn it on
 
-    # Disambiguate and/or clear out duplicates
-    df = language.disambiguate(df)
-    df = dedupe(df, language.name)
+        def _avg_edit_dist_within_thres(group) -> bool:
+            if len(group) == 1:
+                return False
 
-    # Include POS in English to disambiguate on flashcards
-    df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
+            def _preproc(s):
+                """Remove noun plurals/verb conjugations and switch to lowercase"""
+                # TODO consider spaCy for language-specific logic to removing articles
+                return re.sub(r"[,\\[].+$", "", s).lower()
 
-    # Reorder columns for easier copy-paste to flashcard services like Quizlet
-    df = df[["en", language.name, "level", "pos"]]
-    return df
+            edit_distances = []
+            for x, y in combinations(group, 2):
+                if not x or not y:
+                    continue
+                xp = _preproc(x)
+                yp = _preproc(y)
+                edit_distance_pct = edit_distance(xp, yp) / max(len(xp), len(yp))
+                edit_distances.append(edit_distance_pct)
+            if not edit_distances:
+                return False
+            avg_edit = sum(edit_distances) / len(edit_distances)
+            return avg_edit < edit_dist_pct
+
+        df["fuzzy_dupe"] = df.groupby("en")[dest].transform(_avg_edit_dist_within_thres)
+        print(f"Removing {df['fuzzy_dupe'].sum()} fuzzy duplicates")
+        df = df[~df["fuzzy_dupe"]].drop(columns=["fuzzy_dupe"])
+
+        # There can also be different English words that received the same translation
+        # These shouldn't be removed, but it's helpful to warn the user
+        # For flashcards in particular, they may want to revise these with a more specific word
+
+        def _print_ambiguous_translations(group: pd.DataFrame) -> None:
+            if len(group) == 1:
+                return
+            sep = "\n\t- "
+            print(
+                f"{group[dest].iloc[0]} assigned to multiple English words:"
+                f"{sep}{sep.join(group['en'])}".expandtabs(2)
+            )
+
+        print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
+        df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
+        return df
+
+    def translate(
+        self,
+        words: List[Word],
+        language: Language,
+        limit: Optional[int] = None,
+    ) -> List[Word]:
+        """Translate parsed output of PDF into destination language"""
+        translated = []
+        total = len(words)
+        for i, word in enumerate(words):
+            if limit and i > limit:
+                break
+            try:
+                translation = language.get_translation(word)
+            except:
+                print(f"Failed on row {i}: {word.word}")
+                traceback.print_exc()
+                translation = None
+            translated.append(translation)
+            print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
+
+        # Fill nulls when `limit` is set
+        translated += [None] * (len(words) - len(translated))
+        return translated
 
 
 if __name__ == "__main__":
