@@ -31,6 +31,16 @@ except OSError as exc:
     raise RuntimeError("Missing spaCy model: run `python -m spacy download <model_name>` to fix") from exc
 POS_CHARS = "nvadjcopredt"
 
+# TODO CI project template (orchestrated with Earthly running on GitHub Actions)
+#  Static type checks (enforce all objects have type annotations)
+#  Linting (complexity analysis)
+#  Code formatting (ordering of methods, internal methods, named parameters)
+#  Import sorting
+#  Unit tests (coverage)
+#  Submodule organization (no utils/common)
+#  PyEnv dependency management
+#  Deployment (automated semver based on commit messages, package and upload to PyPI)
+
 
 class PartOfSpeech(StrEnum):
     NOUN = "n"
@@ -575,62 +585,27 @@ class FlashcardSet:
 
     flashcards: List[Flashcard]
 
-    def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns
-        # Include POS in English to disambiguate on flashcards
-        df["en"] = df.apply(lambda row: f"{row.en} [{row.pos}.]", axis=1)
-
-        # Reorder columns for easier copy-paste to flashcard services like Quizlet
-        df = df[["en", language.name, "level", "pos"]]
-        rows = [[f.front.format(), f.back.format(word_only=True)] for f in self.flashcards]
-        return pd.DataFrame(rows, columns=["front", "back"])
+    def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
+        """Convert to DataFrame to take advantage of Pandas APIs for post-processing"""
+        return pd.DataFrame([
+            {
+                "front": f.front.format(),
+                "back": f.back.format(word_only=True),
+                "pos": f.front.pos,
+                "level": f.front.level,
+            }
+            for f in self.flashcards
+        ])
 
 
 class FlashCardBuilder:
 
-    def __init__(self, words: List[Word], dest: Language):
+    def __init__(self, words: List[Word], dest: Language, limit: Optional[int] = None) -> None:
         self.words = words
         self.dest = dest
+        self.limit = limit
 
-    def build(self) -> FlashcardSet:
-        flashcards = []
-        for word in self.words:
-            translation = self.dest.get_translation(word)
-            flashcards.append(Flashcard(front=word, back=Word(word=translation, pos=word.pos)))
-        return flashcards
-
-    def postprocess(self) -> None:
-        df = language.disambiguate(df)
-        df = self.dedupe(df, language.name)
-
-    def export(self, base_file: str, split: Optional[str] = None) -> None:
-        df = pd.DataFrame([[f.front, f.back] for f in self.build()], columns=["Front", "Back"])
-        df.to_csv(path, index=False)
-
-    @classmethod
-    def from_src(cls, words_src: str, dest: Language) -> "FlashCardBuilder":
-        """Detect source of words and dispatch to appropriate constructor"""
-        if words_src.endswith(".pdf"):
-            return cls.from_oxford_pdf(words_src, dest)
-        raise NotImplementedError(f"Unsupported source: {words_src}")
-
-    @classmethod
-    def from_oxford_pdf(cls, pdf_path: str, dest: Language) -> "FlashCardBuilder":
-        oxford = OxfordPdf(pdf_path)
-        df = oxford.to_df()
-        words = []
-        for i, row in df.iterrows():
-            words.append(Word(word=row.en, pos=PartOfSpeech(row.pos), level=row.level))
-        return cls(words, dest)
-
-
-@dataclass
-class Translator:
-
-    words: List[Word]
-    dest: Language
-    src: Language = en
-
-    def dedupe(self, df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
+    def _dedupe(self, df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
         """Remove duplicate vocab entries"""
 
         # Obvious ones where the same English word (under different POS) received the same translation
@@ -688,16 +663,15 @@ class Translator:
         df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
         return df
 
-    def translate(
-        self,
-        words: List[Word],
-        language: Language,
-        limit: Optional[int] = None,
-    ) -> List[Word]:
-        """Translate parsed output of PDF into destination language"""
+    def _postprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = self.dest.disambiguate(df)
+        df = self._dedupe(df, self.dest.name)
+        return df
+
+    def _translate(self, limit: Optional[int] = None) -> List[Word]:
         translated = []
-        total = len(words)
-        for i, word in enumerate(words):
+        total = len(self.words)
+        for i, word in enumerate(self.words):
             if limit and i > limit:
                 break
             try:
@@ -707,11 +681,51 @@ class Translator:
                 traceback.print_exc()
                 translation = None
             translated.append(translation)
-            print(f"Translated {(i + 1)/total * 100:.2f}%", end="\r")
+            print(f"Translated {(i + 1) / total * 100:.2f}%", end="\r")
 
         # Fill nulls when `limit` is set
-        translated += [None] * (len(words) - len(translated))
+        translated += [None] * (len(self.words) - len(translated))
         return translated
+
+    def to_csv(self, base_file: str, split: Optional[str] = None) -> None:
+        flashcard_set = self.build()
+        df = flashcard_set.to_df()
+        if split:
+            assert split in df.columns, f"Split column {split} not found in DataFrame"
+            for val in df[split].unique():
+                new = df.loc[df[split] == val]
+                split_path = self.dest.name + f"-{val}.csv"
+                if os.path.isfile(split_path):
+                    existing = pd.read_csv(split_path)
+                    new = pd.concat([existing, new])
+                    new = self._dedupe(new, self.dest.name)
+                new.to_csv(split_path, index=False)
+        else:
+            df.to_csv(base_file + ".csv", index=False)
+
+    def build(self) -> FlashcardSet:
+        translations = self._translate(self.limit)
+        assert len(translations) == len(self.words), "Mismatch between words and translations"
+        return FlashcardSet([
+            Flashcard(front=word, back=translation)
+            for word, translation in zip(self.words, translations)
+        ])
+
+    @classmethod
+    def from_src(cls, words_src: str, *args, **kwargs) -> "FlashCardBuilder":
+        """Detect source of words and dispatch to appropriate constructor"""
+        if words_src.endswith(".pdf"):
+            return cls.from_oxford_pdf(words_src, *args, **kwargs)
+        raise NotImplementedError(f"Unsupported source: {words_src}")
+
+    @classmethod
+    def from_oxford_pdf(cls, pdf_path: str, *args, **kwargs) -> "FlashCardBuilder":
+        oxford = OxfordPdf(pdf_path)
+        df = oxford.to_df()
+        words = []
+        for i, row in df.iterrows():
+            words.append(Word(word=row.en, pos=PartOfSpeech(row.pos), level=row.level))
+        return cls(words, *args, **kwargs)
 
 
 if __name__ == "__main__":
@@ -726,21 +740,9 @@ if __name__ == "__main__":
     # TODO report percent success rate at each step (PDF to text, text to table, table to translation)
     # TODO option to load manual translations so edits can be preserved across changes to the code
 
-    language = foreign_language_map[args.dst]
-    output = translate(
+    builder = FlashCardBuilder.from_oxford_pdf(
         pdf_path=args.pdf_path,
-        language=language,
+        dest=foreign_language_map[args.dst],
         limit=args.limit,
     )
-    base_file = "".join(args.pdf_path.split(".")[:-1])
-    if args.split:
-        for val in output[args.split].unique():
-            new = output.loc[output[args.split] == val]
-            split_path = args.dst + f"-{val}.csv"
-            if os.path.isfile(split_path):
-                existing = pd.read_csv(split_path)
-                new = pd.concat([existing, new])
-                new = dedupe(new, language.name)
-            new.to_csv(split_path, index=False)
-    else:
-        output.to_csv(base_file + ".csv", index=False)
+    builder.to_csv(base_file="flashcards", split=args.split)
