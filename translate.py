@@ -477,7 +477,7 @@ class German(Language):
         """Only nouns should be capitalized in German"""
         translation = super().get_translation(word)
         if word.pos != PartOfSpeech.NOUN:
-            return translation.lower()
+            translation.word = translation.word.lower()
         return translation
 
     @staticmethod
