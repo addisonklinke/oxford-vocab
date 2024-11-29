@@ -64,6 +64,9 @@ class Word:
     note: Optional[str] = None
     level: Optional[str] = None
 
+    def _format_pos(self):
+        return f"[{self.pos}.]"
+
     def format(self, word_only: bool = False) -> str:
         """Formatted word (note) [pos.]"""
 
@@ -74,8 +77,12 @@ class Word:
             return out
         if self.note:
             out += f" ({self.note})"
-        out += f" [{self.pos}.]"
+        out += f" {self._format_pos()}"
         return out
+
+    def to_key(self):
+        """Include POS to allow unique lookup within manual translation configs"""
+        return f"{self.word} {self._format_pos()}"
 
 
 class Language:
@@ -101,6 +108,7 @@ class Language:
 
         # Convert config YAML to attribute
         # TODO use directional name for config files to indicate source language
+        # TODO consider making config its own class
         cfg_path = os.path.join(os.path.dirname(__file__), f"cfg/{self.name}.yaml")
         if os.path.isfile(cfg_path):
             with open(cfg_path) as f:
@@ -206,9 +214,10 @@ class Language:
 
         # TODO parameterize the source language so this can be used for any language pair
 
-        if word in self.cfg[self.SKIP_KEY]:
+        k = word.to_key()
+        if k in self.cfg[self.SKIP_KEY]:
             return None
-        manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(word)
+        manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(k)
         if manual_translation:
             return manual_translation
         method_map = {
