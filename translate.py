@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from collections import defaultdict
+from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
 from itertools import combinations
@@ -161,6 +162,9 @@ class Language:
 
     def get_translation(self, english: str, pos: "PartOfSpeech") -> Optional[str]:
         """Translate a word from English into this language"""
+
+        # TODO parameterize the source language so this can be used for any language pair
+
         if f"{english} [{pos}.]" in self.cfg[self.SKIP_KEY]:
             return None
         manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(english)
@@ -540,59 +544,82 @@ class PartOfSpeech(StrEnum):
     DETERMINER = "det"
 
 
-def dedupe(df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
-    """Remove duplicate vocab entries"""
+@dataclass
+class Word:
+    """A word and its associated metadata for a vocabulary list"""
 
-    # Obvious ones where the same English word (under different POS) received the same translation
-    before = len(df)
-    df = df.drop_duplicates(subset=["en", dest])
-    print(f"Removed {before - len(df)} exact duplicates")
+    word: str
+    pos: PartOfSpeech
+    note: Optional[str] = None
+    level: Optional[str] = None
 
-    # Other times the translations might use different articles but are otherwise the same
-    # Group by English and use edit distance to find similar translations
-    # Calculate the average edit distance across all translations within a group
-    # Then assign boolean column and use later for filtering
-    # This is most often nouns and adjectives that are legitimate so filtering is off by default
-    # a reasonable threshold seems to be 0.5 if you'd like to turn it on
+    def format(self, word_only: bool = False) -> str:
+        """Formatted word (note) [pos.]"""
+        out = self.word
+        if word_only:
+            return out
+        if self.note:
+            out += f" ({self.note})"
+        out += f" [{self.pos}.]"
+        return out
 
     def _avg_edit_dist_within_thres(group) -> bool:
         if len(group) == 1:
             return False
 
-        def _preproc(s):
-            """Remove noun plurals/verb conjugations and switch to lowercase"""
-            # TODO consider spaCy for language-specific logic to removing articles
-            return re.sub(r"[,\\[].+$", "", s).lower()
+@dataclass
+class Flashcard:
 
-        edit_distances = []
-        for x, y in combinations(group, 2):
-            if not x or not y:
-                continue
-            xp = _preproc(x)
-            yp = _preproc(y)
-            edit_distance_pct = edit_distance(xp, yp) / max(len(xp), len(yp))
-            edit_distances.append(edit_distance_pct)
-        if not edit_distances:
-            return False
-        avg_edit = sum(edit_distances) / len(edit_distances)
-        return avg_edit < edit_dist_pct
+    front: Word
+    back: Word
 
-    df["fuzzy_dupe"] = df.groupby("en")[dest].transform(_avg_edit_dist_within_thres)
-    print(f"Removing {df['fuzzy_dupe'].sum()} fuzzy duplicates")
-    df = df[~df["fuzzy_dupe"]].drop(columns=["fuzzy_dupe"])
 
-    # There can also be different English words that received the same translation
-    # These shouldn't be removed, but it's helpful to warn the user
-    # For flashcards in particular, they may want to revise these with a more specific word
+@dataclass
+class FlashcardSet:
 
-    def _print_ambiguous_translations(group: pd.DataFrame) -> None:
-        if len(group) == 1:
-            return
-        sep = "\n\t- "
-        print(
-            f"{group[dest].iloc[0]} assigned to multiple English words:"
-            f"{sep}{sep.join(group['en'])}".expandtabs(2)
-        )
+    flashcards: List[Flashcard]
+
+    def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns
+        rows = [[f.front.format(), f.back.format(word_only=True)] for f in self.flashcards]
+        return pd.DataFrame(rows, columns=["front", "back"])
+
+
+class FlashCardBuilder:
+
+    def __init__(self, words: List[Word], dest: Language):
+        self.words = words
+        self.dest = dest
+
+    def build(self) -> FlashcardSet:
+        flashcards = []
+        for word in self.words:
+            translation = self.dest.get_translation(word.word, word.pos)
+            flashcards.append(Flashcard(front=word, back=Word(word=translation, pos=word.pos)))
+        return flashcards
+
+    def postprocess(self) -> None:
+        """Apply any necessary transformations to the flashcards"""
+        raise NotImplementedError
+
+    def export(self, base_file: str, split: Optional[str] = None) -> None:
+        df = pd.DataFrame([[f.front, f.back] for f in self.build()], columns=["Front", "Back"])
+        df.to_csv(path, index=False)
+
+    @classmethod
+    def from_src(cls, words_src: str, dest: Language) -> "FlashCardBuilder":
+        """Detect source of words and dispatch to appropriate constructor"""
+        if words_src.endswith(".pdf"):
+            return cls.from_oxford_pdf(words_src, dest)
+        raise NotImplementedError(f"Unsupported source: {words_src}")
+
+    @classmethod
+    def from_oxford_pdf(cls, pdf_path: str, dest: Language) -> "FlashCardBuilder":
+        oxford = OxfordPdf(pdf_path)
+        df = oxford.to_df()
+        words = []
+        for i, row in df.iterrows():
+            words.append(Word(word=row.en, pos=PartOfSpeech(row.pos), level=row.level))
+        return cls(words, dest)
 
     print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
     df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
