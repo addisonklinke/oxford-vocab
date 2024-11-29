@@ -7,7 +7,7 @@ from itertools import combinations
 import os
 import re
 import traceback
-from typing import Callable, List, Optional
+from typing import Dict, Callable, List, Optional
 import warnings
 
 import inflect
@@ -596,7 +596,16 @@ class OxfordPdf:
 class Flashcard:
 
     front: Word
-    back: Word
+    back: Optional[Word]
+
+    def to_row(self) -> Dict[str, str]:
+        """Handle possibility of missing back translation"""
+        return {
+            "front": self.front.format(),
+            "back": self.back.format(word_only=True) if self.back else "",
+            "pos": self.front.pos,
+            "level": self.front.level,
+        }
 
 
 @dataclass
@@ -606,15 +615,7 @@ class FlashcardSet:
 
     def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
         """Convert to DataFrame to take advantage of Pandas APIs for post-processing"""
-        return pd.DataFrame([
-            {
-                "front": f.front.format(),
-                "back": f.back.format(word_only=True),
-                "pos": f.front.pos,
-                "level": f.front.level,
-            }
-            for f in self.flashcards
-        ])
+        return pd.DataFrame([f.to_row() for f in self.flashcards])
 
 
 class FlashCardBuilder:
