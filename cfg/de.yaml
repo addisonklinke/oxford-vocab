@@ -1,8 +1,3 @@
-disambiguations:
-  bad: objectively
-  bag: durable material, with handles  # https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fxy8gq7ye9yh51.jpg
-  clean: thoroughly
-  dress [v.]: put on clothes
 skip:
   # Past tense of another verb
   - might [v.]
@@ -947,4 +942,4 @@ translations:
   top (exceed) [v.]: übertreffen [übertrifft, übertraf, hat übertroffen]
   top (cap off, crown) [v.]: krönen
   vacuum [n.]: der Staubsauger, -
-  wrothwhile [adj.]: lohnenswert
+  worthwhile [adj.]: lohnenswert
