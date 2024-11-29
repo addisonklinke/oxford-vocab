@@ -7,7 +7,7 @@ from itertools import combinations
 import os
 import re
 import traceback
-from typing import List, Optional
+from typing import Callable, List, Optional
 import warnings
 
 import inflect
@@ -35,6 +35,7 @@ POS_CHARS = "nvadjcopredt"  # TODO make this a dynamic property of PartOfSpeech
 #  Static type checks (enforce all objects have type annotations)
 #  Linting (complexity analysis)
 #  Code formatting (ordering of methods, internal methods, named parameters)
+#  Documentation (docstrings, comments, code snippets)
 #  Import sorting, grouping, and relative usage
 #  Unit tests (coverage)
 #  Submodule organization (no utils/common)
@@ -147,6 +148,11 @@ class Language:
             ending = self.extract_plural_ending(translation, plural)
         return Word(translation, PartOfSpeech.NOUN, plural_ending=ending)
 
+    def _get_other_translation(self, english: str, pos: PartOfSpeech) -> Word:
+        """Wrapper around `translate_from()` for compatibility with `Word` return type"""
+        translation = self.translate_from(english, src="en")
+        return Word(translation, pos)
+
     def _get_verb_translation(self, english_infinitive: str) -> Word:
         # FIXME returning a lot of capitalized words
         translated_infinitive_prefix = en.translate_to("to", dest=self.name).lower()
@@ -224,10 +230,10 @@ class Language:
             PartOfSpeech.NOUN: self._get_noun_translation,
             PartOfSpeech.VERB: self._get_verb_translation,
         }
-        method = method_map.get(word.pos, partial(self.translate_from, src="en"))
-        # TODO return an object with word, context, POS, etc attrs and use a default formatter class to get the string
+        method: Callable[[str], Word] = method_map.get(word.pos, partial(self._get_other_translation, pos=word.pos))
         translation = method(word.word)
-        return re.sub(r"\s+", " ", translation)
+        translation.word = re.sub(r"\s+", " ", translation.word)
+        return translation
 
     def pluralize(self, noun: str) -> str:
         if self.name != "en":
@@ -313,17 +319,19 @@ class German(Language):
         "zer",
     )
 
-    def _get_noun_translation(self, english: str) -> str:
+    def _get_noun_translation(self, english: str) -> Word:
         """Make sure article is lowercase"""
         translation = super()._get_noun_translation(english)
-        article, *noun = translation.split()
+        article, *noun = translation.word.split()
         article = article.lower()
         noun[0] = noun[0].capitalize()
-        return article + " " + " ".join(noun)
+        translation.word = article + " " + " ".join(noun)
+        return translation
 
-    def _get_verb_translation(self, english_infinitive: str) -> str:
+    def _get_verb_translation(self, english_infinitive: str) -> Word:
         translation = super()._get_verb_translation(english_infinitive)
-        return re.sub("^u?m ", "", translation)  # Remove the leftover of zum / um zu
+        translation.word = re.sub("^u?m ", "", translation.word)  # Remove the leftover of zum / um zu
+        return translation
 
     def conjugate(
         self,
