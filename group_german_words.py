@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from collections import defaultdict
+import re
 from typing import Dict, List, Tuple
 
 from flashcard_builder.io import concat_csvs
@@ -9,6 +10,7 @@ from flashcard_builder.language import German
 def format_verbs(base_verb_prefixes: Dict[str, List[Tuple[str, str]]]) -> str:
     """Combine different definitions under the same prefix, sorted alphabetically, and add padding/indent"""
     output = ""
+    note_regex = re.compile(r" \[.*\]")
     for base_verb, prefixes in base_verb_prefixes.items():
         prefix_definitions = defaultdict(list)
         for prefix, definition in prefixes:
@@ -16,9 +18,9 @@ def format_verbs(base_verb_prefixes: Dict[str, List[Tuple[str, str]]]) -> str:
         if len(prefix_definitions) == 1:
             continue
         output += "\n" + base_verb + "\n\t"
-        pad = max(len(prefix) for prefix in prefixes) + len(base_verb)
+        pad = max(len(prefix) for prefix in prefixes) + len(note_regex.sub("", base_verb))
         definitions = [
-            f"{prefix + base_verb:<{pad}}: {', '.join(definitions)}"
+            f"{note_regex.sub('', prefix + base_verb):<{pad}}: {', '.join(definitions)}"
             for prefix, definitions
             in sorted(prefix_definitions.items(), key=lambda x: x[0])
         ]
