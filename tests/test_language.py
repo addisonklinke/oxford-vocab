@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from copy import deepcopy
-from typing import Dict
+from typing import Any, Dict
 
 import pytest
 
@@ -8,23 +8,53 @@ from flashcard_builder.language import Language, German
 
 
 @contextmanager
-def with_config(language: Language, config: Dict[str, str]) -> Language:
+def with_config(language: Language, cfg: Dict[str, Any]) -> Language:
     """Temporarily override the language config for testing a specific case"""
-    original = deepcopy(language.config)
+    original = deepcopy(language.cfg)
     valid_keys = set(original.keys())
-    for key in config:
+    for key in cfg:
         if key not in valid_keys:
             raise ValueError(f"Invalid key: {key}")
-    language.config.update(config)
+    language.cfg.update(cfg)
     yield language
-    language.config = original
+    language.cfg = original
 
 
 class TestGerman:
 
     @pytest.fixture(scope="function")
     def german(self):
-        return German()
+        """Remove the auto-imported config to avoid side-effects on tests"""
+        de = German()
+        de.cfg = {}
+        de._init_missing_cfg_keys()
+        return de
+
+    @pytest.mark.parametrize("singular", ["Belohnung", "Freiheit", "Tatigkeit", "Transaktion", "Kollision"])
+    def test_extract_plural_ending_feminine_hardcoded(self, german, singular):
+        """Configured suffixes should always result in -en"""
+        assert german.extract_plural_ending(
+            singular=f"die {singular}",
+            plural=""  # Shouldn't matter for hardcoded cases
+        ) == "-en"
+
+    def test_get_noun_translation_configured_plural(self, german, mocker):
+        """Plural endings are extracted from the configured list instead of using extract method"""
+
+        # Without any config settings this should fail to find a plural
+        # Because the correct `Eltern` is not a suffix of `Elternteil`
+        spy = mocker.spy(german, "extract_plural_ending")
+        english = "parent"
+        singular = "der Elternteil"
+        plural_ending = "Eltern"
+        assert german._get_noun_translation(english).word == singular
+        spy.assert_called_once_with(singular=singular, plural=f"die {plural_ending}")
+
+        # With the correct config setting, the plural should be found
+        with with_config(german, {"plurals": {singular: plural_ending}}) as german:
+            word = german._get_noun_translation(english)
+        assert word.word == singular
+        assert word.plural_ending == plural_ending
 
     def test_remove_umlauts(self, german):
         """Umlaut characters are replaced with their base form"""
