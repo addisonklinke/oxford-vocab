@@ -22,7 +22,7 @@ class Flashcard:
     def to_row(self) -> Dict[str, str]:
         """Handle possibility of missing back translation"""
         return {
-            "front": self.front.format(),
+            "front": self.front.format(),  # TODO use two-letter language abbreviations?
             "back": self.back.format(word_only=True) if self.back else "",
             "pos": self.front.pos,
             "level": self.front.level,

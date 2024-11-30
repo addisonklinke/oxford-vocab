@@ -2,7 +2,7 @@ from collections import defaultdict
 from functools import partial
 import os
 import re
-from typing import Callable, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 import warnings
 
 import inflect
@@ -326,8 +326,7 @@ class German(Language):
 
         # Irregulars are the same for all prefixes
         # TODO `voran` is a valid prefix (combining multiple)
-        all_prefixes = "|".join(self.separable_prefixes + self.inseparable_prefixes)
-        base_verb = re.sub(f"^({all_prefixes})", "", infinitive_native)
+        base_verb = self.prefix_regex.sub("", infinitive_native)
         irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg[self.IRREGULARS_KEY]), None)
         if irregular_key:
             return self.cfg[self.IRREGULARS_KEY][irregular_key]
@@ -423,6 +422,34 @@ class German(Language):
         if word.pos != PartOfSpeech.NOUN:
             translation.word = translation.word.lower()
         return translation
+
+    def group_verbs(self, df: pd.DataFrame) -> Dict[str, List[Tuple[str, str]]]:
+        """Group verbs after stripping prefixes and record definition for each prefix"""
+
+        # Validate input
+        required_cols = ("en", "de", "pos")
+        missing = [col for col in required_cols if col not in df.columns]
+        if missing:
+            raise ValueError(f"Missing required columns: {', '.join(missing)}")
+
+        # Build prefix mapping
+        base_verb_prefixes = defaultdict(list)
+        for i, row in df.iterrows():
+            if row.pos != PartOfSpeech.VERB or pd.isna(row.de):
+                continue
+            verb = row.de
+            base_verb = self.prefix_regex.sub("", verb)
+            if verb == base_verb:
+                continue
+            prefix = verb.replace(base_verb, "")
+            base_verb_prefixes[base_verb].append((prefix, row.en))
+        return base_verb_prefixes
+
+    @property
+    def prefix_regex(self) -> re.Pattern:
+        """Regex to match any German verb prefix"""
+        all_prefixes = "|".join(self.separable_prefixes + self.inseparable_prefixes)
+        return re.compile(f"^({all_prefixes})")
 
     @staticmethod
     def remove_umlauts(de_text: str) -> str:
