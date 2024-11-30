@@ -33,6 +33,7 @@ class Word:
         """Formatted word (note) [pos.]"""
 
         # TODO add distinction for plural only nouns (currently in YAML as ~)
+        # TODO make boolean flags more granular
 
         out = self.word
         if word_only:
