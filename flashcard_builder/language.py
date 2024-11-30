@@ -442,7 +442,7 @@ class German(Language):
             if verb == base_verb:
                 continue
             prefix = verb.replace(base_verb, "")
-            base_verb_prefixes[base_verb].append((prefix, row.en))
+            base_verb_prefixes[base_verb].append((prefix, row.en.replace(" [v.]", "")))  # TODO use Word object
         return base_verb_prefixes
 
     @property
