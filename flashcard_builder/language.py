@@ -56,12 +56,7 @@ class Language:
                 self.cfg = yaml.safe_load(f)
         else:
             self.cfg = {}
-        for key in (self.SKIP_KEY, self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
-            if (
-                key not in self.cfg
-                or self.cfg[key] is None
-            ):
-                self.cfg[key] = {}
+        self._init_missing_cfg_keys()
 
         # Parse manually defined translations for disambiguating notes and POS
         # TODO consider allowing parenthetical note before English word (sometimes it reads more naturally that way)
@@ -106,6 +101,15 @@ class Language:
         else:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
         return Word(translation, PartOfSpeech.VERB, note=note)
+
+    def _init_missing_cfg_keys(self) -> None:
+        """Fill missing keys with empty dictionaries so methods can assume they exist"""
+        for key in (self.SKIP_KEY, self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
+            if (
+                key not in self.cfg
+                or self.cfg[key] is None
+            ):
+                self.cfg[key] = {}
 
     def conjugate(self, infinitive: str, tense: str, mood: str, person: str) -> str:
         """Return verb's conjugation in this language"""
