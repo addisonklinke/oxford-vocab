@@ -1,0 +1,2 @@
+-r pkg.txt
+pytest==8.3.3
