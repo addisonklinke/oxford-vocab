@@ -443,6 +443,17 @@ class German(Language):
                 continue
             prefix = verb.replace(base_verb, "")
             base_verb_prefixes[base_verb].append((prefix, row.en.replace(" [v.]", "")))  # TODO use Word object
+
+        # Add the base verb to the list of prefixes
+        # Can't do this in the loop because the base verb may not have any prefixes
+        for base_verb in list(base_verb_prefixes):
+            matches = df.loc[df.de == base_verb]
+            if matches.empty:
+                continue  # Some verbs might use a prefix but their base form isn't in the list
+            base_definition = ", ".join(en.replace(" [v.]", "") for en in matches.en)
+            if len(matches) > 1:
+                print(f"Multiple definitions for {base_verb}: {base_definition}")
+            base_verb_prefixes[base_verb].append(("", base_definition))
         return base_verb_prefixes
 
     @property

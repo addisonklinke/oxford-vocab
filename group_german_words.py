@@ -17,7 +17,7 @@ def format_verbs(base_verb_prefixes: Dict[str, List[Tuple[str, str]]]) -> str:
             prefix_definitions[prefix].append(definition)
         if len(prefix_definitions) == 1:
             continue
-        output += "\n" + base_verb + "\n\t"
+        output += "\n" + base_verb + "\n\t"  # TODO put the base definition on this line
         pad = max(len(prefix) for prefix in prefixes) + len(note_regex.sub("", base_verb))
         definitions = [
             f"{note_regex.sub('', prefix + base_verb):<{pad}}: {', '.join(definitions)}"
