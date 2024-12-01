@@ -169,7 +169,7 @@ class Language:
             return None
         manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(k)
         if manual_translation:
-            return manual_translation
+            return Word(manual_translation, pos=word.pos)
         method_map = {
             PartOfSpeech.NOUN: self._get_noun_translation,
             PartOfSpeech.VERB: self._get_verb_translation,
@@ -416,10 +416,10 @@ class German(Language):
                 ending = None
         return ending
 
-    def get_translation(self, word: Word) -> Word:
+    def get_translation(self, word: Word) -> Optional[Word]:
         """Only nouns should be capitalized in German"""
         translation = super().get_translation(word)
-        if word.pos != PartOfSpeech.NOUN:
+        if translation and word.pos != PartOfSpeech.NOUN:
             translation.word = translation.word.lower()
         return translation
 
