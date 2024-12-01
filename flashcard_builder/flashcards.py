@@ -134,6 +134,7 @@ class FlashCardBuilder:
     def to_csv(self, base_file: str, split: Optional[str] = None) -> None:
         flashcard_set = self.build()
         df = flashcard_set.to_df()
+        df = self._postprocess(df)
         if split:
             assert split in df.columns, f"Split column {split} not found in DataFrame"
             for val in df[split].unique():
