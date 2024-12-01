@@ -31,7 +31,7 @@ class TestFlashCardBuilderIntegrationGerman:
             },
             "translations": {
                 "become [v.]": "werden [wird, wurde, ist geworden]",
-                "bad (objectively)[adj.]": "schlecht",
+                "bad (objectively) [adj.]": "schlecht",
                 "bad(subjectively) [adj.]": "schlimm",
             },
         }
@@ -57,6 +57,8 @@ class TestFlashCardBuilderIntegrationGerman:
             Word("abuse", PartOfSpeech.VERB),  # Disambiguated by including English `to` (otherwise gets noun)
             Word("give", PartOfSpeech.VERB),  # Direct match for configured irregular
             Word("spend", PartOfSpeech.VERB),  # Matches configured irregular once prefix is removed
+
+            # TODO other POS to test lowercasing and article removal
         ]
 
     def test_to_csv(self, words, cfg, tmp_path):
@@ -78,17 +80,17 @@ class TestFlashCardBuilderIntegrationGerman:
         sort_key = "front"
         actual = pd.read_csv(csv_path).sort_values(sort_key).reset_index(drop=True)
         rows = [
-            {"front": "bad (objectively)", "back": "schlecht", "pos": "adj"},
-            {"front": "bad (subjectively)", "back": "schlimm", "pos": "adj"},
-            {"front": "become", "back": "werden [wird, wurde, ist geworden]", "pos": "v"},
-            {"front": "moment", "back": "der Augenblick, -e", "pos": "n"},
-            {"front": "difficulty", "back": "die Schwierigkeit, -en", "pos": "n"},
-            {"front": "address", "back": "die Adresse, -n", "pos": "n"},
-            {"front": "advice", "back": "der Ratschlag, -̈e", "pos": "n"},
-            {"front": "parent", "back": "der Elternteil", "pos": "n"},
-            {"front": "abuse", "back": "missbrauchen", "pos": "v"},
-            {"front": "give", "back": "geben [gibt, gab, hat gegeben]", "pos": "v"},
-            {"front": "ausgeben", "back": "ausgeben [gibt, gab, hat gegeben.]", "pos": "v"},
+            {"front": "bad (objectively) [adj.]", "back": "schlecht", "pos": "adj"},
+            {"front": "bad (subjectively) [adj.]", "back": "schlimm", "pos": "adj"},
+            {"front": "become [v.]", "back": "werden [wird, wurde, ist geworden]", "pos": "v"},
+            {"front": "moment [n.]", "back": "der Augenblick, -e", "pos": "n"},
+            {"front": "difficulty [n.]", "back": "die Schwierigkeit, -en", "pos": "n"},
+            {"front": "address [n.]", " back": "die Adresse, -n", "pos": "n"},
+            {"front": "advice [n.]", "back": "der Ratschlag, -̈e", "pos": "n"},
+            {"front": "parent [n.]", "back": "der Elternteil", "pos": "n"},
+            {"front": "abuse [v.]", "back": "missbrauchen", "pos": "v"},
+            {"front": "give [v.]", "back": "geben [gibt, gab, hat gegeben]", "pos": "v"},
+            {"front": "ausgeben [v.]", "back": "ausgeben [gibt, gab, hat gegeben.]", "pos": "v"},
         ]
         for r in rows:
             r.update({"level": pd.NA})
