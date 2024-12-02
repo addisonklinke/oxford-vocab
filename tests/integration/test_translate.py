@@ -32,7 +32,7 @@ class TestFlashCardBuilderIntegrationGerman:
             "translations": {
                 "become [v.]": "werden [wird, wurde, ist geworden]",
                 "bad (objectively) [adj.]": "schlecht",
-                "bad(subjectively) [adj.]": "schlimm",
+                "bad (subjectively) [adj.]": "schlimm",
             },
         }
 
