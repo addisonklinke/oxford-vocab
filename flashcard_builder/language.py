@@ -56,20 +56,10 @@ class Language:
                 self.cfg = yaml.safe_load(f)
         else:
             self.cfg = {}
-        self._init_missing_cfg_keys()
+        self.init_missing_cfg_keys()
 
         # Parse manually defined translations for disambiguating notes and POS
-        # TODO consider allowing parenthetical note before English word (sometimes it reads more naturally that way)
-        english_regex = re.compile(r"([a-z]+)(?:\s\((.+)\))? \[([a-z]+)\.\]")
-        self.ambiguous_words = defaultdict(list)
-        for english_full, translation in self.cfg[self.TRANSLATIONS_KEY].items():
-            s = english_regex.match(english_full)
-            if not s:
-                print(f"Failed to parse manual translation: {english_full}")
-                continue
-            english_word, note, pos = s.groups()
-            if note:
-                self.ambiguous_words[(english_word, pos)].append((note, translation))
+        self.ambiguous_words = self.get_ambiguous_words()
 
     def _get_noun_translation(self, english: str) -> Word:
         # TODO handle bifurcated masculine/feminine nouns (i.e. [stem]erin, -nen)
@@ -102,7 +92,7 @@ class Language:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
         return Word(translation, PartOfSpeech.VERB, note=note)
 
-    def _init_missing_cfg_keys(self) -> None:
+    def init_missing_cfg_keys(self) -> None:
         """Fill missing keys with empty dictionaries so methods can assume they exist"""
         for key in (self.SKIP_KEY, self.TRANSLATIONS_KEY, self.IRREGULARS_KEY, self.PLURALS_KEY):
             if (
@@ -158,6 +148,23 @@ class Language:
     def extract_plural_ending(self, singular: str, plural: str) -> Optional[str]:
         """Subclasses can define language specific behavior. None tells consumers to ignore"""
         return None
+
+    def get_ambiguous_words(self) -> Dict[Tuple[str, str], List[Tuple[str, str]]]:
+        """Get manually defined translations for ambiguous words"""
+
+        # TODO consider allowing parenthetical note before English word (sometimes it reads more naturally that way)
+
+        english_regex = re.compile(r"([a-z]+)(?:\s\((.+)\))? \[([a-z]+)\.\]")
+        ambiguous_words = defaultdict(list)
+        for english_full, translation in self.cfg[self.TRANSLATIONS_KEY].items():
+            s = english_regex.match(english_full)
+            if not s:
+                print(f"Failed to parse manual translation: {english_full}")
+                continue
+            english_word, note, pos = s.groups()
+            if note:
+                ambiguous_words[(english_word, pos)].append((note, translation))
+        return ambiguous_words
 
     def get_translation(self, word: Word) -> Optional[Word]:
         """Translate a word from English into this language"""

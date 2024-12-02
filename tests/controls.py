@@ -15,6 +15,8 @@ def configured(language: Language, cfg: Dict[str, Any]) -> Language:
     for key in cfg:
         if key not in valid_keys:
             raise ValueError(f"Invalid key: {key}")
-    language.cfg.update(cfg)
+    language.cfg = cfg
+    language.init_missing_cfg_keys()
+    language.ambiguous_words = language.get_ambiguous_words()
     yield language
     language.cfg = original

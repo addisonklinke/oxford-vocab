@@ -4,7 +4,7 @@
 #  Code formatting (ordering of methods, internal methods, named parameters)
 #  Documentation (docstrings, comments, code snippets)
 #  Import sorting, grouping, and relative usage
-#  Unit tests (coverage, doctests, no warnings raised during testing)
+#  Unit tests (coverage, doctests, no warnings raised during testing, no bare asserts)
 #  Submodule organization (no utils/common)
 #  PyEnv dependency management
 #  Deployment (automated semver based on commit messages, package and upload to PyPI)

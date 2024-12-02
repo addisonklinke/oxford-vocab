@@ -12,7 +12,7 @@ class TestGerman:
         """Remove the auto-imported config to avoid side-effects on tests"""
         de = German()
         de.cfg = {}
-        de._init_missing_cfg_keys()
+        de.init_missing_cfg_keys()
         return de
 
     @pytest.mark.parametrize("infinitive, note, prefix", [
