@@ -77,20 +77,22 @@ class TestFlashCardBuilderIntegrationGerman:
         # Load back to disk and compare
         csv_path = base_file.with_suffix(".csv")
         assert os.path.isfile(csv_path), "CSV failed to export"
-        sort_key = "front"
-        actual = pd.read_csv(csv_path).sort_values(sort_key).reset_index(drop=True)
+        actual = pd.read_csv(csv_path)
+        sort_key = "en"
+        assert sort_key in actual.columns, f"Missing sort key: {sort_key}"
+        actual = actual.sort_values(sort_key).reset_index(drop=True)
         rows = [
-            {"front": "bad (objectively) [adj.]", "back": "schlecht", "pos": "adj"},
-            {"front": "bad (subjectively) [adj.]", "back": "schlimm", "pos": "adj"},
-            {"front": "become [v.]", "back": "werden [wird, wurde, ist geworden]", "pos": "v"},
-            {"front": "moment [n.]", "back": "der Augenblick, -e", "pos": "n"},
-            {"front": "difficulty [n.]", "back": "die Schwierigkeit, -en", "pos": "n"},
-            {"front": "address [n.]", " back": "die Adresse, -n", "pos": "n"},
-            {"front": "advice [n.]", "back": "der Ratschlag, -̈e", "pos": "n"},
-            {"front": "parent [n.]", "back": "der Elternteil", "pos": "n"},
-            {"front": "abuse [v.]", "back": "missbrauchen", "pos": "v"},
-            {"front": "give [v.]", "back": "geben [gibt, gab, hat gegeben]", "pos": "v"},
-            {"front": "ausgeben [v.]", "back": "ausgeben [gibt, gab, hat gegeben.]", "pos": "v"},
+            {"en": "bad (objectively) [adj.]", German.name: "schlecht", "pos": "adj"},
+            {"en": "bad (subjectively) [adj.]", German.name: "schlimm", "pos": "adj"},
+            {"en": "become [v.]", German.name: "werden [wird, wurde, ist geworden]", "pos": "v"},
+            {"en": "moment [n.]", German.name: "der Augenblick, -e", "pos": "n"},
+            {"en": "difficulty [n.]", German.name: "die Schwierigkeit, -en", "pos": "n"},
+            {"en": "address [n.]", German.name: "die Adresse, -n", "pos": "n"},
+            {"en": "advice [n.]", German.name: "der Ratschlag, -̈e", "pos": "n"},
+            {"en": "parent [n.]", German.name: "der Elternteil", "pos": "n"},
+            {"en": "abuse [v.]", German.name: "missbrauchen", "pos": "v"},
+            {"en": "give [v.]", German.name: "geben [gibt, gab, hat gegeben]", "pos": "v"},
+            {"en": "ausgeben [v.]", German.name: "ausgeben [gibt, gab, hat gegeben.]", "pos": "v"},
         ]
         for r in rows:
             r.update({"level": pd.NA})
