@@ -23,7 +23,7 @@ class Flashcard:
         """Handle possibility of missing back translation"""
         return {
             front_col: self.front.format(),
-            back_col: self.back.format(word_only=True) if self.back else "",
+            back_col: self.back.format(word_only=True) if self.back else None,
             "pos": self.front.pos,
             "level": self.front.level,
         }
