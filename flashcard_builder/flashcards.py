@@ -19,11 +19,11 @@ class Flashcard:
     front: Word
     back: Optional[Word]
 
-    def to_row(self) -> Dict[str, str]:
+    def to_row(self, front_col: str = "front", back_col: str = "back") -> Dict[str, str]:
         """Handle possibility of missing back translation"""
         return {
-            "front": self.front.format(),  # TODO use two-letter language abbreviations?
-            "back": self.back.format(word_only=True) if self.back else "",
+            front_col: self.front.format(),
+            back_col: self.back.format(word_only=True) if self.back else "",
             "pos": self.front.pos,
             "level": self.front.level,
         }
@@ -34,9 +34,9 @@ class FlashcardSet:
 
     flashcards: List[Flashcard]
 
-    def to_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
+    def to_df(self, front_col: str = "front", back_col: str = "back") -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
         """Convert to DataFrame to take advantage of Pandas APIs for post-processing"""
-        return pd.DataFrame([f.to_row() for f in self.flashcards])
+        return pd.DataFrame([f.to_row(front_col, back_col) for f in self.flashcards])
 
 
 class FlashCardBuilder:
@@ -133,7 +133,7 @@ class FlashCardBuilder:
 
     def to_csv(self, base_file: str, split: Optional[str] = None) -> None:
         flashcard_set = self.build()
-        df = flashcard_set.to_df()
+        df = flashcard_set.to_df(front_col="en", back_col=self.dest.name)
         df = self._postprocess(df)
         if split:
             assert split in df.columns, f"Split column {split} not found in DataFrame"
