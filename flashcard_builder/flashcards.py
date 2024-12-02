@@ -108,6 +108,7 @@ class FlashCardBuilder:
     def _postprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df = self.dest.disambiguate(df)
         df = self._dedupe(df, self.dest.name)
+        df = df.dropna(subset=self.dest.name)
         return df
 
     def _translate(self, limit: Optional[int] = None) -> List[Word]:
