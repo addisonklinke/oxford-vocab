@@ -18,12 +18,11 @@ class PartOfSpeech(StrEnum):
     PRONOUN = "pron"
 
 
-@dataclass
 class Word:
     """A word and its associated metadata for a vocabulary list"""
 
     word: str
-    pos: PartOfSpeech
+    pos: Optional[PartOfSpeech] = None
     plural_ending: Optional[str] = None
     note: Optional[str] = None
     level: Optional[str] = None

@@ -35,8 +35,21 @@ class FlashcardSet:
     flashcards: List[Flashcard]
 
     def to_df(self, front_col: str = "front", back_col: str = "back") -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
-        """Convert to DataFrame to take advantage of Pandas APIs for post-processing"""
-        return pd.DataFrame([f.to_row(front_col, back_col) for f in self.flashcards])
+        """Convert to DataFrame to take advantage of Pandas APIs for post-processing
+
+        This maintains the series' elements as `Word` objects for better
+        in-memory manipulation. To serialize this dataframe to CSV after
+        post-processing, use `.write_csv()`
+        """
+        return pd.DataFrame(
+            data=[(f.front, f.back) for f in self.flashcards],
+            columns=[front_col, back_col]
+        )
+
+    @staticmethod
+    def write_csv(df: pd.DataFrame, path: str) -> None:
+        """Write DataFrame of `Word` objects to CSV with their notes and POS in string format"""
+        assert len(df.columns) == 2, "DataFrame must have two columns (front and back)"
 
 
 class FlashCardBuilder:

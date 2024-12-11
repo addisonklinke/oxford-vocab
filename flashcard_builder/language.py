@@ -120,23 +120,21 @@ class Language:
 
         # Get rid of existing translations
         to_remove = []
-        english_word2level = df.set_index("en")["level"].to_dict()
+        english_words = {word.word for word in df.en.unique()}
         for i, row in df.iterrows():
-            if (row.en, row.pos) in self.ambiguous_words:
+            if (row.en.word, row.en.pos) in self.ambiguous_words:
                 to_remove.append(i)
         df.drop(to_remove, axis=0, inplace=True)
 
         # Replace with manual translations
         new_rows = []
         for (english, pos), translations in self.ambiguous_words.items():
-            if english not in english_word2level:
+            if english not in english_words:
                 continue  # Doesn't apply to this vocab list
             for note, translation in translations:
                 new_rows.append({
-                    "en": english,
-                    self.name: translation,
-                    "pos": pos,
-                    "level": english_word2level[english],
+                    "en": Word(english, PartOfSpeech(pos), note=note),
+                    self.name: Word(translation),
                 })
         assert len(new_rows) >= len(to_remove), "Failed to replace all ambiguous translations"
         return pd.concat([df, pd.DataFrame(new_rows)])
