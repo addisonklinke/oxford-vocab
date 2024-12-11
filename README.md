@@ -18,8 +18,18 @@ Oxford Dictionary publishes excellent lists that resolve these issues
 
 but sadly these are only in English.
 However, as an English speaker learning another language I think you can assume the most frequent English words are going to still be roughly the ones you should target in the foreign language.
-Given that, why not just translate the Oxford lists instead? Even better, programmatically translate them to save a bunch of manual typing
+Given that, why not just translate the Oxford lists instead?
+Even better, programmatically translate them to save a bunch of manual typing
 
 # Usage
 
-WIP: I've created a rough first-pass to handle German translation and plan to generalize it for other languages moving forward
+German is the most developed `Language` so far, but other subclasses can be added
+
+```
+python translate.py --pdf_path oxford_3000.pdf --dst de
+```
+
+# Testing
+
+* From command line: `pytest tests/`
+* Through PyCharm gutters: under `Settings > Tools > Python Integrated Tools`, choose `pytest` as default test runner 
