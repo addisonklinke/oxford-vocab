@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
 
+from .patterns import SERIALIZED_WORD
+
 POS_CHARS = "nvadjcopredt"  # TODO make this a dynamic property of PartOfSpeech
 
 
@@ -42,6 +44,15 @@ class Word:
             out += f" ({self.note})"
         out += f" {self._format_pos()}"
         return out
+
+    @classmethod
+    def from_string(cls, s: str) -> "Word":
+        """Parse string from CSV or config YAML"""
+        match = SERIALIZED_WORD.match(s)
+        if not match:
+            raise ValueError(f"Invalid word format: {s}. Must match: {SERIALIZED_WORD.pattern}")
+        word, note, pos = match.groups()
+        return cls(word, PartOfSpeech(pos), note=note)
 
     def to_key(self):
         """Include POS to allow unique lookup within manual translation configs"""

@@ -151,19 +151,11 @@ class Language:
 
     def get_ambiguous_words(self) -> Dict[Tuple[str, str], List[Tuple[str, str]]]:
         """Get manually defined translations for ambiguous words"""
-
-        # TODO consider allowing parenthetical note before English word (sometimes it reads more naturally that way)
-
-        english_regex = re.compile(r"([a-z]+)(?:\s\((.+)\))? \[([a-z]+)\.\]")
         ambiguous_words = defaultdict(list)
-        for english_full, translation in self.cfg[self.TRANSLATIONS_KEY].items():
-            s = english_regex.match(english_full)
-            if not s:
-                print(f"Failed to parse manual translation: {english_full}")
-                continue
-            english_word, note, pos = s.groups()
-            if note:
-                ambiguous_words[(english_word, pos)].append((note, translation))
+        for english_str, translation in self.cfg[self.TRANSLATIONS_KEY].items():
+            word = Word.from_string(english_str)
+            if word.note:
+                ambiguous_words[(word.word, word.pos)].append((word.note, translation))
         return ambiguous_words
 
     def get_translation(self, word: Word) -> Optional[Word]:
