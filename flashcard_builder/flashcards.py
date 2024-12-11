@@ -68,39 +68,6 @@ class FlashCardBuilder:
         df = df.drop_duplicates(subset=["en", dest])
         print(f"Removed {before - len(df)} exact duplicates")
 
-        # Other times the translations might use different articles but are otherwise the same
-        # Group by English and use edit distance to find similar translations
-        # Calculate the average edit distance across all translations within a group
-        # Then assign boolean column and use later for filtering
-        # This is most often nouns and adjectives that are legitimate so filtering is off by default
-        # a reasonable threshold seems to be 0.5 if you'd like to turn it on
-
-        def _avg_edit_dist_within_thres(group) -> bool:
-            if len(group) == 1:
-                return False
-
-            def _preproc(s):
-                """Remove noun plurals/verb conjugations and switch to lowercase"""
-                # TODO consider spaCy for language-specific logic to removing articles
-                return re.sub(r"[,\\[].+$", "", s).lower()
-
-            edit_distances = []
-            for x, y in combinations(group, 2):
-                if not x or not y:
-                    continue
-                xp = _preproc(x)
-                yp = _preproc(y)
-                edit_distance_pct = edit_distance(xp, yp) / max(len(xp), len(yp))
-                edit_distances.append(edit_distance_pct)
-            if not edit_distances:
-                return False
-            avg_edit = sum(edit_distances) / len(edit_distances)
-            return avg_edit < edit_dist_pct
-
-        df["fuzzy_dupe"] = df.groupby("en")[dest].transform(_avg_edit_dist_within_thres)
-        print(f"Removing {df['fuzzy_dupe'].sum()} fuzzy duplicates")
-        df = df[~df["fuzzy_dupe"]].drop(columns=["fuzzy_dupe"])
-
         # There can also be different English words that received the same translation
         # These shouldn't be removed, but it's helpful to warn the user
         # For flashcards in particular, they may want to revise these with a more specific word
