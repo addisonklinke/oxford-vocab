@@ -60,7 +60,7 @@ class FlashCardBuilder:
         self.limit = limit
         self.strict = strict
 
-    def _dedupe(self, df: pd.DataFrame, dest: str, edit_dist_pct: float = 0.0) -> pd.DataFrame:
+    def _dedupe(self, df: pd.DataFrame, dest: str) -> pd.DataFrame:
         """Remove duplicate vocab entries"""
 
         # Obvious ones where the same English word (under different POS) received the same translation
@@ -77,8 +77,8 @@ class FlashCardBuilder:
                 return
             sep = "\n\t- "
             print(
-                f"{group[dest].iloc[0]} assigned to multiple English words:"
-                f"{sep}{sep.join(group['en'])}".expandtabs(2)
+                f"{group[dest].iloc[0].word} assigned to multiple English words:"
+                f"{sep}{sep.join(word.word for word in group['en'])}".expandtabs(2)
             )
 
         print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
