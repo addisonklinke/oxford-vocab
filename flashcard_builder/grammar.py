@@ -18,6 +18,7 @@ class PartOfSpeech(StrEnum):
     PRONOUN = "pron"
 
 
+@dataclass
 class Word:
     """A word and its associated metadata for a vocabulary list"""
 
