@@ -41,6 +41,10 @@ class Word:
             relevant += self.note
         return hash(relevant)
 
+    def __lt__(self, other):
+        """Pandas groupby implicitly requires sortability"""
+        return self.word < other.word
+
     def _format_pos(self):
         return f"[{self.pos}.]"
 
