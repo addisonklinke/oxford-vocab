@@ -28,6 +28,19 @@ class Word:
     note: Optional[str] = None
     level: Optional[str] = None
 
+    def __hash__(self):
+        """Don't differentiate by level or plural ending as these are more error-prone
+
+        Part of speech and note are purposefully used to disambiguate words,
+        so these are important to include
+        """
+        relevant = self.word
+        if self.pos:
+            relevant += str(self.pos)
+        if self.note:
+            relevant += self.note
+        return hash(relevant)
+
     def _format_pos(self):
         return f"[{self.pos}.]"
 

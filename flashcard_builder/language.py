@@ -120,7 +120,7 @@ class Language:
 
         # Get rid of existing translations
         to_remove = []
-        english_words = {word.word for word in df.en.unique()}
+        english_words = {word.word for word in df.en}
         for i, row in df.iterrows():
             if (row.en.word, row.en.pos) in self.ambiguous_words:
                 to_remove.append(i)
