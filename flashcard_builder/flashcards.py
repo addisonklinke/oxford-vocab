@@ -19,15 +19,6 @@ class Flashcard:
     front: Word
     back: Optional[Word]
 
-    def to_row(self, front_col: str = "front", back_col: str = "back") -> Dict[str, str]:
-        """Handle possibility of missing back translation"""
-        return {
-            front_col: self.front.format(),
-            back_col: self.back.format(word_only=True) if self.back else None,
-            "pos": self.front.pos,
-            "level": self.front.level,
-        }
-
 
 @dataclass
 class FlashcardSet:
@@ -47,9 +38,12 @@ class FlashcardSet:
         )
 
     @staticmethod
-    def write_csv(df: pd.DataFrame, path: str) -> None:
+    def write_csv(df: pd.DataFrame, path: str, front_col: str, back_col: str, **kwargs) -> None:
         """Write DataFrame of `Word` objects to CSV with their notes and POS in string format"""
         assert len(df.columns) == 2, "DataFrame must have two columns (front and back)"
+        df[front_col] = df[front_col].apply(lambda word: word.format_front())
+        df[back_col] = df[back_col].apply(lambda word: word.format_back())
+        df.to_csv(path, **kwargs)
 
 
 class FlashCardBuilder:
@@ -113,9 +107,14 @@ class FlashCardBuilder:
         return translated
 
     def to_csv(self, base_file: str, split: Optional[str] = None) -> None:
+
+        # Maintain `Word` objects throughout post-processing for better in-memory manipulation
         flashcard_set = self.build()
-        df = flashcard_set.to_df(front_col="en", back_col=self.dest.name)
+        cols = {"front_col": "en", "back_col": self.dest.name}
+        df = flashcard_set.to_df(**cols)
         df = self._postprocess(df)
+
+        # Only switch to string format for final serialization
         if split:
             assert split in df.columns, f"Split column {split} not found in DataFrame"
             for val in df[split].unique():
@@ -127,7 +126,7 @@ class FlashCardBuilder:
                     new = self._dedupe(new, self.dest.name)
                 new.to_csv(split_path, index=False)
         else:
-            df.to_csv(base_file + ".csv", index=False)
+            FlashcardSet.write_csv(df, base_file + ".csv", **cols, index=False)
 
     def build(self) -> FlashcardSet:
         translations = self._translate(self.limit)

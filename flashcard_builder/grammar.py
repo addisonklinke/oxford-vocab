@@ -25,6 +25,7 @@ class Word:
     word: str
     pos: Optional[PartOfSpeech] = None
     plural_ending: Optional[str] = None
+    conjugation: Optional[str] = None
     note: Optional[str] = None
     level: Optional[str] = None
 
@@ -48,18 +49,25 @@ class Word:
     def _format_pos(self):
         return f"[{self.pos}.]"
 
-    def format(self, word_only: bool = False) -> str:
-        """Formatted word (note) [pos.]"""
-
-        # TODO add distinction for plural only nouns (currently in YAML as ~)
-        # TODO make boolean flags more granular
-
+    def format_front(self) -> str:
+        """Formatted for front side of flashcard with POS + note to disambiguate"""
         out = self.word
-        if word_only:
-            return out
         if self.note:
             out += f" ({self.note})"
-        out += f" {self._format_pos()}"
+        if self.pos:
+            out += f" {self._format_pos()}"
+        return out
+
+    def format_back(self) -> str:
+        """Formatted for back side of flashcard with plural/conjugation info"""
+
+        # TODO add distinction for plural only nouns (currently in YAML as ~)
+
+        out = self.word
+        if self.pos == PartOfSpeech.NOUN and self.plural_ending:
+            out += f", {self.plural_ending}"
+        if self.pos == PartOfSpeech.VERB and self.conjugation:
+            out += f" [{self.conjugation}]"
         return out
 
     @classmethod

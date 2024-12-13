@@ -90,7 +90,7 @@ class Language:
             note = self.cfg[self.IRREGULARS_KEY][translation]
         else:
             note = self.extract_irregular_verb_forms(english_infinitive, translation)
-        return Word(translation, PartOfSpeech.VERB, note=note)
+        return Word(translation, PartOfSpeech.VERB, conjugation=note)
 
     def init_missing_cfg_keys(self) -> None:
         """Fill missing keys with empty dictionaries so methods can assume they exist"""
