@@ -43,8 +43,8 @@ class FlashcardSet:
         assert len(df.columns) == 2, "DataFrame must have two columns (front and back)"
 
         # Get level and POS before converting Word objects (use front side)
-        df["level"] = df[front_col].apply(lambda word: word.level)
         df["pos"] = df[front_col].apply(lambda word: word.pos.value)
+        df["level"] = df[front_col].apply(lambda word: word.level)
 
         # Serialize Word objects to strings (differently for front vs. back)
         df[front_col] = df[front_col].apply(lambda word: word.format_front())
