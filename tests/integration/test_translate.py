@@ -49,8 +49,8 @@ class TestFlashCardBuilderIntegrationGerman:
             # TODO configured plural by association with root word
             Word("moment", PartOfSpeech.NOUN),  # Configured plural (translate -> der Augenblick, die Momente)
             Word("difficulty", PartOfSpeech.NOUN),  # Extract ending: hardcoded rule (keit -> -en)
-            Word("art", PartOfSpeech.NOUN),  # Extract ending: exact extension of singular
-            Word("advice", PartOfSpeech.NOUN),  # Extract ending: umlaut in plural
+            Word("address", PartOfSpeech.NOUN),  # Extract ending: exact extension of singular
+            Word("art", PartOfSpeech.NOUN),  # Extract ending: umlaut in plural
             Word("parent", PartOfSpeech.NOUN),  # Extract ending: expecting `None` from irregular plural (involving stem change)
 
             # Verbs
