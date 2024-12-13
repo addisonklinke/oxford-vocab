@@ -81,20 +81,22 @@ class TestFlashCardBuilderIntegrationGerman:
         sort_key = "en"
         assert sort_key in actual.columns, f"Missing sort key: {sort_key}"
         actual = actual.sort_values(sort_key).reset_index(drop=True)
-        rows = [
-            {"en": "bad (objectively) [adj.]", German.name: "schlecht", "pos": "adj"},
-            {"en": "bad (subjectively) [adj.]", German.name: "schlimm", "pos": "adj"},
-            {"en": "become [v.]", German.name: "werden [wird, wurde, ist geworden]", "pos": "v"},
-            {"en": "moment [n.]", German.name: "der Augenblick, -e", "pos": "n"},
-            {"en": "difficulty [n.]", German.name: "die Schwierigkeit, -en", "pos": "n"},
-            {"en": "address [n.]", German.name: "die Adresse, -n", "pos": "n"},
-            {"en": "advice [n.]", German.name: "der Ratschlag, -̈e", "pos": "n"},
-            {"en": "parent [n.]", German.name: "der Elternteil", "pos": "n"},
-            {"en": "abuse [v.]", German.name: "missbrauchen", "pos": "v"},
-            {"en": "give [v.]", German.name: "geben [gibt, gab, hat gegeben]", "pos": "v"},
-            {"en": "ausgeben [v.]", German.name: "ausgeben [gibt, gab, hat gegeben.]", "pos": "v"},
-        ]
-        for r in rows:
-            r.update({"level": pd.NA})
-        expected = pd.DataFrame(rows).sort_values(sort_key).reset_index(drop=True)
+        expected = pd.DataFrame(
+            [
+                ("bad (objectively) [adj.]", "schlecht", "adj"),
+                ("bad (subjectively) [adj.]", "schlimm", "adj"),
+                ("become [v.]", "werden [wird, wurde, ist geworden]", "v"),
+                ("moment [n.]", "der Augenblick, -e", "n"),
+                ("difficulty [n.]", "die Schwierigkeit, -en", "n"),
+                ("address [n.]", "die Adresse, -n", "n"),
+                ("art [n.]", "die Kunst, -̈e", "n"),
+                ("parent [n.]", "der Elternteil", "n"),
+                ("abuse [v.]", "missbrauchen", "v"),
+                ("give [v.]", "geben [gibt, gab, hat gegeben]", "v"),
+                ("spend [v.]", "ausgeben [gibt, gab, hat gegeben]", "v"),
+            ],
+            columns=["en", German.name, "pos"],
+        )
+        expected["level"] = pd.NA
+        expected = expected.sort_values(sort_key).reset_index(drop=True)
         pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
