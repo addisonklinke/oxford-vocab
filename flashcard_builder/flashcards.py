@@ -41,6 +41,12 @@ class FlashcardSet:
     def write_csv(df: pd.DataFrame, path: str, front_col: str, back_col: str, **kwargs) -> None:
         """Write DataFrame of `Word` objects to CSV with their notes and POS in string format"""
         assert len(df.columns) == 2, "DataFrame must have two columns (front and back)"
+
+        # Get level and POS before converting Word objects (use front side)
+        df["level"] = df[front_col].apply(lambda word: word.level)
+        df["pos"] = df[front_col].apply(lambda word: word.pos.value)
+
+        # Serialize Word objects to strings (differently for front vs. back)
         df[front_col] = df[front_col].apply(lambda word: word.format_front())
         df[back_col] = df[back_col].apply(lambda word: word.format_back())
         df.to_csv(path, **kwargs)
