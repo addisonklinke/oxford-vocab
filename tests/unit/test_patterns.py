@@ -23,3 +23,15 @@ class TestSerializedWord:
         note = "note with spaces, commas, and other punctuation"
         match = p.SERIALIZED_WORD.match(f"word ({note}) [n.]")
         assert match.groups() == ("word", note, "n")
+
+
+class TestWhiteSpaceStrip:
+
+    def test_leading_whitespace(self):
+        assert p.WHITESPACE_STRIP.sub("", "  word") == "word"
+
+    def test_trailing_whitespace(self):
+        assert p.WHITESPACE_STRIP.sub("", "word  ") == "word"
+
+    def test_whitespace_between_words(self):
+        assert p.WHITESPACE_STRIP.sub("", "word  word") == "word word"

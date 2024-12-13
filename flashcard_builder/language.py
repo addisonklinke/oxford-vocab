@@ -15,6 +15,7 @@ import spacy
 import yaml
 
 from .grammar import PartOfSpeech, Word
+from .patterns import WHITESPACE_STRIP
 
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)  # mlconjug3
 warnings.filterwarnings("ignore", category=FutureWarning, message="You are using")  # spacy/pytorch
@@ -173,7 +174,7 @@ class Language:
         }
         method: Callable[[str], Word] = method_map.get(word.pos, partial(self._get_other_translation, pos=word.pos))
         translation = method(word.word)
-        translation.word = re.sub(r"\s+", " ", translation.word)
+        translation.word = WHITESPACE_STRIP.sub("", translation.word)
         return translation
 
     def pluralize(self, noun: str) -> str:
