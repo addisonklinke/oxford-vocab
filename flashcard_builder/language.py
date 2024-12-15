@@ -185,11 +185,13 @@ class Language:
 
     def translate_from(self, text: str, src: str) -> str:
         """Translate text from another language to this one"""
-        return translator.translate(text, src=src, dest=self.name).text
+        raw = translator.translate(text, src=src, dest=self.name).text
+        return WHITESPACE_STRIP.sub("", raw)
 
     def translate_to(self, text: str, dest: str) -> str:
         """Translate text from this language into another"""
-        return translator.translate(text, src=self.name, dest=dest).text
+        raw = translator.translate(text, src=self.name, dest=dest).text
+        return WHITESPACE_STRIP.sub("", raw)
 
 
 class English(Language):
