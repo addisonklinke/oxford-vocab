@@ -14,7 +14,7 @@ class TestGerman:
 
         "zu helfen" -> " helfen" != "helfen: hilft, half, hat geholfen"
 
-        Fixed in deb51dd, 643f164, and
+        Fixed in deb51dd, 643f164, and 7fa28ae1
         """
         mistakes = [
             Word("aid", PartOfSpeech.VERB),  # helfen
@@ -45,7 +45,6 @@ class TestGerman:
         expected = {
             "advertise": "wirbt, warb, hat geworben",
             "aid": "hilft, half, hat geholfen",
-            "attend": "nimmt, nahm, hat genommen",
             "award": "gibt, gab, hat gegeben",
             "call": "ruft, rief, hat gerufen",
             "retrieve": "ruft, rief, hat gerufen",

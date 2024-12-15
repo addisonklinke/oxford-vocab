@@ -240,26 +240,41 @@ class German(Language):
 
     name = "de"
 
-    # https://coffeebreaklanguages.com/2024/06/making-sense-of-german-separable-verbs-a-guide-for-learners/
+    # Basic: https://coffeebreaklanguages.com/2024/06/making-sense-of-german-separable-verbs-a-guide-for-learners/
+    # Inseparable: http://germanforenglishspeakers.com/verbs/prefix-verbs/
+    # Separable: https://www.corelanguages.com/german-separable-prefix-verbs/
     separable_prefixes = (
-        "ab",  # FIXME abrufen
-        "an",  # FIXME not working for anstreben, angreifen
-        "auf",  # FIXME aufrufen
+        "ab",
+        "an",
+        "auf",
         "aus",
         "bei",
+        "da",
+        "durch",
         "ein",
+        "fern",
+        "fest",
+        "fort",
+        "her",
+        "hin",
         "mit",
-        "nach",  # But this works for nachkommen
+        "nach",
+        "teil",
         "um",
+        "über",
         "vor",
+        "wieder",
         "zu",
+        "zurück",
     )
     inseparable_prefixes = (
         "be",
         "emp",
         "ent",
-        "er",   # FIXME not working for ernennen, erfinden, ergreifen, ergeben
-        "ver",  # FIXME not working for vergeben, verbergen
+        "er",
+        "miss",
+        "ver",
+        "voll",
         "zer",
     )
 
