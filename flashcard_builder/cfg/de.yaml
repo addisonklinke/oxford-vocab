@@ -217,6 +217,7 @@ irregulars:
   wegwerfen: wirft weg, warf weg, hat weggeworfen
   wehtun: tut weh, tat weh, hat wehgetan
   weisen: wies, hat gewiesen
+  werben: wirbt, warb, hat geworben
   werden: wird, wurde, ist geworden
   werfen: wirft, warf, hat geworfen
   wiedersehen: sieht wieder, sah wieder, hat wiedergesehen
@@ -680,7 +681,7 @@ translations:
   common (typical) [adj.]: häufig
   cream (whipped) [n.]: die Sahne
   create (make, formal) [v.]: erstellen
-  design (something artistic) [v.]: entwerfen
+  design (something artistic) [v.]: entwerfen [entwirft, entwarf, hat entworfen]
   dish (menu item) [n.]: das Gericht, -e
   dish (flat plate) [n.]: die Platte, -n
   dish (plate with slight depth) [n.]: der Teller, -
@@ -722,9 +723,9 @@ translations:
   afternoon [n.]: der Nachmittag, -e
   act (do something) [v.]: handeln
   act (behaved like) [v.]: sich verhalten
-  act (in theater) [v.]: auftreten
+  act (in theater) [v.]: auftreten [tritt auf, trat auf, ist aufgetreten]
   actually [adj.]: tatsächlich
-  advertise [v.]: werben
+  advertise [v.]: werben [wirbt, warb, hat geworben]
   amount (mathematical sum) [n.]: die Summe, -n
   amount (number of things) [n.]: der Betrag, -̈e
   anymore [adv.]: nicht mehr
@@ -780,7 +781,7 @@ translations:
   succeed [v.]: gelingen
   tablet [n.]: das Tablett, -s
   taste [v.]: schmecken
-  tie (fasten) [v.]: binden
+  tie (fasten) [v.]: binden [band, hat gebunden]
   tie (draw in a competition) [v.]: unentschieden spielen
   tie (formal wear) [n.]: die Krawatte, -n
   tie (draw in a competition) [n.]: der Gleichstand, -̈e
@@ -796,7 +797,7 @@ translations:
   balance (positive/negative sum, financial) [n.]: der Saldo, Salden
   balance (physical position) [v.]: balancieren
   balance (manage a tradeoff) [v.]: ausgleichen [glich aus, hat ausgeglichen]
-  balance (financial accounts) [v.]: begleichnen [beglich, hat beglichen]
+  balance (financial accounts) [v.]: begleichen [beglich, hat beglichen]
   base (foundation) [n.]: die Basis, Basen
   base (bottom of a structure) [n.]: der Sockel, -
   base (off of) [v.]: basieren
@@ -881,7 +882,7 @@ translations:
   positive [n.]: das Positiv, -e  # `der Positiv` is also listed on Netzverb, hard to tell which is more common
   power [v.]: antreiben [trieb an, hat angetrieben]
   price [v.]: bewerten
-  purchase [v.]: erwerben  # `kaufen` is also translated, but is already used for `buy`
+  purchase [v.]: erwerben [erwirbt, erwarb, hat erworben]  # `kaufen` is also translated, but is already used for `buy`
   schedule (especially to agree upon) [v.]: festlegen  # `planen` also works
   seat [v.]: hinsetzen
   sector [n.]: die Branche, -n  # Google gets article wrong
