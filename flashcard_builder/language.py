@@ -86,7 +86,7 @@ class Language:
             text="to " + english_infinitive,  # Use infinitive to ensure ambiguous words aren't treated as nouns
             dest=self.name
         )
-        translation = translation.lower().replace(translated_infinitive_prefix, "")
+        translation = WHITESPACE_STRIP.sub("", translation.lower().replace(translated_infinitive_prefix, ""))
         if translation in self.cfg[self.IRREGULARS_KEY]:
             note = self.cfg[self.IRREGULARS_KEY][translation]
         else:
@@ -257,7 +257,7 @@ class German(Language):
     inseparable_prefixes = (
         "be",
         "emp",
-        "ent",  # FIXME not working for entlassen
+        "ent",
         "er",   # FIXME not working for ernennen, erfinden, ergreifen, ergeben
         "ver",  # FIXME not working for vergeben, verbergen
         "zer",
@@ -326,6 +326,7 @@ class German(Language):
 
         # Irregulars are the same for all prefixes
         # TODO `voran` is a valid prefix (combining multiple)
+        # TODO get rid of reflexive `sich` as well
         base_verb = self.prefix_regex.sub("", infinitive_native)
         irregular_key = next((k for k in (infinitive_native, base_verb) if k in self.cfg[self.IRREGULARS_KEY]), None)
         if irregular_key:

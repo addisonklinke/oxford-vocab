@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
 
-from .patterns import SERIALIZED_WORD
+from .patterns import SERIALIZED_WORD, WHITESPACE_STRIP
 
 POS_CHARS = "nvadjcopredt"  # TODO make this a dynamic property of PartOfSpeech
 
@@ -28,6 +28,9 @@ class Word:
     conjugation: Optional[str] = None
     note: Optional[str] = None
     level: Optional[str] = None
+
+    def __post_init__(self):
+        self.word = WHITESPACE_STRIP.sub("", self.word)
 
     def __hash__(self):
         """Don't differentiate by level or plural ending as these are more error-prone
