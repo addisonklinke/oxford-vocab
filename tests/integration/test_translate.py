@@ -39,24 +39,25 @@ class TestFlashCardBuilderIntegrationGerman:
     @pytest.fixture(scope="class")
     def words(self) -> List[Word]:
         """Words to translate into flashcards"""
+        level = "A1"
         return [
             # General
-            Word("might", PartOfSpeech.VERB),  # Skipped
-            Word("bad", PartOfSpeech.ADJECTIVE),  # Regular: to be replaced by disambiguated translation
-            Word("become", PartOfSpeech.VERB),  # Has a manual translation (not including disambiguation)
+            Word("might", PartOfSpeech.VERB, level=level),  # Skipped
+            Word("bad", PartOfSpeech.ADJECTIVE, level=level),  # Regular: to be replaced by disambiguated translation
+            Word("become", PartOfSpeech.VERB, level=level),  # Has a manual translation (not including disambiguation)
 
             # Nouns
             # TODO configured plural by association with root word
-            Word("moment", PartOfSpeech.NOUN),  # Configured plural (translate -> der Augenblick, die Momente)
-            Word("difficulty", PartOfSpeech.NOUN),  # Extract ending: hardcoded rule (keit -> -en)
-            Word("address", PartOfSpeech.NOUN),  # Extract ending: exact extension of singular
-            Word("art", PartOfSpeech.NOUN),  # Extract ending: umlaut in plural
-            Word("parent", PartOfSpeech.NOUN),  # Extract ending: expecting `None` from irregular plural (involving stem change)
+            Word("moment", PartOfSpeech.NOUN, level=level),  # Configured plural (translate -> der Augenblick, die Momente)
+            Word("difficulty", PartOfSpeech.NOUN, level=level),  # Extract ending: hardcoded rule (keit -> -en)
+            Word("address", PartOfSpeech.NOUN, level=level),  # Extract ending: exact extension of singular
+            Word("art", PartOfSpeech.NOUN, level=level),  # Extract ending: umlaut in plural
+            Word("parent", PartOfSpeech.NOUN, level=level),  # Extract ending: expecting `None` from irregular plural (involving stem change)
 
             # Verbs
-            Word("abuse", PartOfSpeech.VERB),  # Disambiguated by including English `to` (otherwise gets noun)
-            Word("give", PartOfSpeech.VERB),  # Direct match for configured irregular
-            Word("spend", PartOfSpeech.VERB),  # Matches configured irregular once prefix is removed
+            Word("abuse", PartOfSpeech.VERB, level=level),  # Disambiguated by including English `to` (otherwise gets noun)
+            Word("give", PartOfSpeech.VERB, level=level),  # Direct match for configured irregular
+            Word("spend", PartOfSpeech.VERB, level=level),  # Matches configured irregular once prefix is removed
 
             # TODO other POS to test lowercasing and article removal
         ]
@@ -97,6 +98,6 @@ class TestFlashCardBuilderIntegrationGerman:
             ],
             columns=["en", German.name, "pos"],
         )
-        expected["level"] = pd.NA
+        expected["level"] = "A1"
         expected = expected.sort_values(sort_key).reset_index(drop=True)
         pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
