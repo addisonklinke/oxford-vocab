@@ -169,6 +169,9 @@ class Language:
             return None
         manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(k)
         if manual_translation:
+            # TODO this only propagates conjugation notes by coincidence
+            #  They're not actually assigned to the `conjugation` attribute, but printed as part of `word`
+            #  Resolving requires `Word.from_string()` but currently that doesn't differentiate conjugation vs. POS
             return Word(manual_translation, pos=word.pos, level=word.level)
         method_map = {
             PartOfSpeech.NOUN: self._get_noun_translation,

@@ -125,7 +125,7 @@ class FlashCardBuilder:
             assert split in df.columns, f"Split column {split} not found in DataFrame"
             for val in df[split].unique():
                 new = df.loc[df[split] == val]
-                split_path = self.dest.name + f"-{val}.csv"
+                split_path = base_file + f"-{val}.csv"
                 if os.path.isfile(split_path):
                     existing = pd.read_csv(split_path)
                     new = pd.concat([existing, new])
