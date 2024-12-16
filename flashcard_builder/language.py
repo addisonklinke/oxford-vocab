@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import deepcopy
 from functools import partial
 import os
 import re
@@ -162,12 +163,13 @@ class Language:
 
         # TODO parameterize the source language so this can be used for any language pair
 
+        level = deepcopy(word.level)
         k = word.to_key()
         if k in self.cfg[self.SKIP_KEY]:
             return None
         manual_translation = self.cfg[self.TRANSLATIONS_KEY].get(k)
         if manual_translation:
-            return Word(manual_translation, pos=word.pos)
+            return Word(manual_translation, pos=word.pos, level=word.level)
         method_map = {
             PartOfSpeech.NOUN: self._get_noun_translation,
             PartOfSpeech.VERB: self._get_verb_translation,
@@ -175,6 +177,7 @@ class Language:
         method: Callable[[str], Word] = method_map.get(word.pos, partial(self._get_other_translation, pos=word.pos))
         translation = method(word.word)
         translation.word = WHITESPACE_STRIP.sub("", translation.word)
+        translation.level = level
         return translation
 
     def pluralize(self, noun: str) -> str:
