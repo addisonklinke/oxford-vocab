@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-from itertools import combinations
+from dataclasses import dataclass, fields
 import os
-import re
 import traceback
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-from nltk import edit_distance
 import pandas as pd
 
 from .grammar import PartOfSpeech, Word
@@ -24,9 +21,15 @@ class Flashcard:
 class FlashcardSet:
 
     flashcards: List[Flashcard]
+    src: str
+    dest: str
 
-    def to_df(self, front_col: str = "front", back_col: str = "back") -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
-        """Convert to DataFrame to take advantage of Pandas APIs for post-processing
+    @property
+    def serialized_columns(self) -> List[str]:
+        return [self.src, self.dest, "pos", "level"]
+
+    def to_word_df(self) -> pd.DataFrame:  # TODO can dataframe type annotations contain columns?
+        """Wrap Word objects in Pandas DataFrame to take advantage of post-processing APIs
 
         This maintains the series' elements as `Word` objects for better
         in-memory manipulation. To serialize this dataframe to CSV after
@@ -34,22 +37,20 @@ class FlashcardSet:
         """
         return pd.DataFrame(
             data=[(f.front, f.back) for f in self.flashcards],
-            columns=[front_col, back_col]
+            columns=[self.src, self.dest]
         )
 
-    @staticmethod
-    def write_csv(df: pd.DataFrame, path: str, front_col: str, back_col: str, **kwargs) -> None:
-        """Write DataFrame of `Word` objects to CSV with their notes and POS in string format"""
-        assert len(df.columns) == 2, "DataFrame must have two columns (front and back)"
+    def to_serializable_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Prepare DataFrame of `Word` objects for CSV with their notes and POS in string format"""
 
         # Get level and POS before converting Word objects (use front side)
-        df["pos"] = df[front_col].apply(lambda word: word.pos.value)
-        df["level"] = df[front_col].apply(lambda word: word.level)
+        df["pos"] = df[self.src].apply(lambda word: word.pos.value)
+        df["level"] = df[self.src].apply(lambda word: word.level)
 
         # Serialize Word objects to strings (differently for front vs. back)
-        df[front_col] = df[front_col].apply(lambda word: word.format_front())
-        df[back_col] = df[back_col].apply(lambda word: word.format_back())
-        df.to_csv(path, **kwargs)
+        df[self.src] = df[self.src].apply(lambda word: word.format_front())
+        df[self.dest] = df[self.dest].apply(lambda word: word.format_back())
+        return df
 
 
 class FlashCardBuilder:
@@ -116,31 +117,40 @@ class FlashCardBuilder:
 
         # Maintain `Word` objects throughout post-processing for better in-memory manipulation
         flashcard_set = self.build()
-        cols = {"front_col": "en", "back_col": self.dest.name}
-        df = flashcard_set.to_df(**cols)
+        df = flashcard_set.to_word_df()
         df = self._postprocess(df)
 
         # Only switch to string format for final serialization
+        col_order = flashcard_set.serialized_columns
         if split:
-            assert split in df.columns, f"Split column {split} not found in DataFrame"
+            word_fields = {field.name for field in fields(Word)}
+            if split not in word_fields:
+                raise ValueError(f"Split column {split} must be a Word field")
+            df[split] = df["en"].apply(lambda word: getattr(word, split, None))
             for val in df[split].unique():
-                new = df.loc[df[split] == val]
+                filtered = df.loc[df[split] == val]
+                df_ser = flashcard_set.to_serializable_df(filtered)
                 split_path = base_file + f"-{val}.csv"
                 if os.path.isfile(split_path):
                     existing = pd.read_csv(split_path)
-                    new = pd.concat([existing, new])
-                    new = self._dedupe(new, self.dest.name)
-                new.to_csv(split_path, index=False)
+                    df_ser = pd.concat([existing, df_ser])
+                    df_ser = self._dedupe(df_ser, self.dest.name)
+                df_ser.to_csv(split_path, index=False, columns=col_order)
         else:
-            FlashcardSet.write_csv(df, base_file + ".csv", **cols, index=False)
+            df_ser = flashcard_set.to_serializable_df(df)
+            df_ser.to_csv(base_file + ".csv", index=False, columns=col_order)
 
     def build(self) -> FlashcardSet:
         translations = self._translate(self.limit)
         assert len(translations) == len(self.words), "Mismatch between words and translations"
-        return FlashcardSet([
-            Flashcard(front=word, back=translation)
-            for word, translation in zip(self.words, translations)
-        ])
+        return FlashcardSet(
+            flashcards=[
+                Flashcard(front=word, back=translation)
+                for word, translation in zip(self.words, translations)
+            ],
+            src="en",
+            dest=self.dest.name,
+        )
 
     @classmethod
     def from_src(cls, words_src: str, *args, **kwargs) -> "FlashCardBuilder":
