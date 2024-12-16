@@ -101,3 +101,51 @@ class TestFlashCardBuilderIntegrationGerman:
         expected["level"] = "A1"
         expected = expected.sort_values(sort_key).reset_index(drop=True)
         pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
+
+    def test_to_csv_split(self, tmp_path):
+        """Split Dataframe by level and merge with existing file
+
+        Use all adjectives until Google Translate is mocked because it's more reliable deduping
+        """
+
+        # Existing CSV (from a previous command)
+        level = "A1"
+        base_file = tmp_path / German.name
+        existing = pd.DataFrame(
+            [
+                ("new [adj.]", "neu", "adj", level),
+                ("identical [adj.]", "identisch", "adj", level),
+            ],
+            columns=["en", German.name, "pos", "level"],
+        )
+        existing.to_csv(tmp_path / f"{base_file}-{level}.csv", index=False)
+
+        # New words to combine
+        words = [
+            Word("different", PartOfSpeech.ADJECTIVE, level="A2"),
+            Word("identical", PartOfSpeech.ADJECTIVE, level=level),
+            Word("additional", PartOfSpeech.ADJECTIVE, level=level),
+        ]
+        de = German()
+        builder = FlashCardBuilder(words, dest=de)
+        builder.to_csv(str(base_file), split="level")
+
+        # Check split files
+        a1 = pd.read_csv(tmp_path / f"{base_file}-A1.csv")
+        a1_expected = pd.DataFrame(
+            [
+                ("new [adj.]", "neu", "adj", level),
+                ("identical [adj.]", "identisch", "adj", level),
+                ("additional [adj.]", "zusätzlich", "adj", level),
+            ],
+            columns=["en", German.name, "pos", "level"],
+        )
+        pd.testing.assert_frame_equal(a1, a1_expected, check_dtype=False)
+        a2 = pd.read_csv(tmp_path / f"{base_file}-A2.csv")
+        a2_expected = pd.DataFrame(
+            [
+                ("different [adj.]", "anders", "adj", "A2"),
+            ],
+            columns=["en", German.name, "pos", "level"],
+        )
+        pd.testing.assert_frame_equal(a2, a2_expected, check_dtype=False)
