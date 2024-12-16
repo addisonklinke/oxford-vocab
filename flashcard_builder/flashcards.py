@@ -130,7 +130,7 @@ class FlashCardBuilder:
             for val in df[split].unique():
                 filtered = df.loc[df[split] == val]
                 df_ser = flashcard_set.to_serializable_df(filtered)
-                split_path = base_file + f"-{val}.csv"
+                split_path = self.dest.name + f"-{val}.csv"  # Shared name to combine multiple sources
                 if os.path.isfile(split_path):
                     existing = pd.read_csv(split_path)
                     df_ser = pd.concat([existing, df_ser])
