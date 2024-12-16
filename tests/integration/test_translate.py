@@ -110,7 +110,6 @@ class TestFlashCardBuilderIntegrationGerman:
 
         # Existing CSV (from a previous command)
         level = "A1"
-        base_file = tmp_path / German.name
         existing = pd.DataFrame(
             [
                 ("new [adj.]", "neu", "adj", level),
@@ -118,7 +117,7 @@ class TestFlashCardBuilderIntegrationGerman:
             ],
             columns=["en", German.name, "pos", "level"],
         )
-        existing.to_csv(tmp_path / f"{base_file}-{level}.csv", index=False)
+        existing.to_csv(tmp_path / f"{German.name}-{level}.csv", index=False)
 
         # New words to combine
         words = [
@@ -128,10 +127,10 @@ class TestFlashCardBuilderIntegrationGerman:
         ]
         de = German()
         builder = FlashCardBuilder(words, dest=de)
-        builder.to_csv(str(base_file), split="level")
+        builder.to_csv(str(tmp_path / "base"), split="level")
 
         # Check split files
-        a1 = pd.read_csv(tmp_path / f"{base_file}-A1.csv")
+        a1 = pd.read_csv(tmp_path / f"{German.name}-A1.csv")
         a1_expected = pd.DataFrame(
             [
                 ("new [adj.]", "neu", "adj", level),
@@ -141,7 +140,7 @@ class TestFlashCardBuilderIntegrationGerman:
             columns=["en", German.name, "pos", "level"],
         )
         pd.testing.assert_frame_equal(a1, a1_expected, check_dtype=False)
-        a2 = pd.read_csv(tmp_path / f"{base_file}-A2.csv")
+        a2 = pd.read_csv(tmp_path / f"{German.name}-A2.csv")
         a2_expected = pd.DataFrame(
             [
                 ("different [adj.]", "anders", "adj", "A2"),
