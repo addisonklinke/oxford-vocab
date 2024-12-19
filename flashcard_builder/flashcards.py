@@ -61,34 +61,8 @@ class FlashCardBuilder:
         self.limit = limit
         self.strict = strict
 
-    def _dedupe(self, df: pd.DataFrame, dest: str) -> pd.DataFrame:
-        """Remove duplicate vocab entries"""
-
-        # Obvious ones where the same English word (under different POS) received the same translation
-        before = len(df)
-        df = df.drop_duplicates(subset=["en", dest])
-        print(f"Removed {before - len(df)} exact duplicates")
-
-        # There can also be different English words that received the same translation
-        # These shouldn't be removed, but it's helpful to warn the user
-        # For flashcards in particular, they may want to revise these with a more specific word
-
-        def _print_ambiguous_translations(group: pd.DataFrame) -> None:
-            if len(group) == 1:
-                return
-            sep = "\n\t- "
-            print(
-                f"{group[dest].iloc[0].word} assigned to multiple English words:"
-                f"{sep}{sep.join(word.word for word in group['en'])}".expandtabs(2)
-            )
-
-        print(f"Found {len(df.groupby(dest).filter(lambda group: len(group) > 1))} ambiguous translations")
-        df.groupby(dest)[["en", dest]].apply(_print_ambiguous_translations)
-        return df
-
-    def _postprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = self.dest.disambiguate(df)
-        df = self._dedupe(df, self.dest.name)
+    def _clean(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.drop_duplicates(subset=["en", self.dest.name])
         df = df.dropna(subset=self.dest.name)
         return df
 
@@ -118,7 +92,8 @@ class FlashCardBuilder:
         # Maintain `Word` objects throughout post-processing for better in-memory manipulation
         flashcard_set = self.build()
         df = flashcard_set.to_word_df()
-        df = self._postprocess(df)
+        df = self.dest.disambiguate(df)  # Doesn't need to happen when loading/combining splits
+        df = self._clean(df)
 
         # Only switch to string format for final serialization
         col_order = flashcard_set.serialized_columns
@@ -135,7 +110,7 @@ class FlashCardBuilder:
                 if os.path.isfile(split_path):
                     existing = pd.read_csv(split_path)
                     df_ser = pd.concat([existing, df_ser])
-                    df_ser = self._dedupe(df_ser, self.dest.name)
+                    df_ser = self._clean(df_ser)
                 df_ser.to_csv(split_path, index=False, columns=col_order)
         else:
             df_ser = flashcard_set.to_serializable_df(df)
