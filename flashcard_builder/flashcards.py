@@ -43,6 +43,8 @@ class FlashcardSet:
     def to_serializable_df(self, df: pd.DataFrame) -> pd.DataFrame:
         """Prepare DataFrame of `Word` objects for CSV with their notes and POS in string format"""
 
+        # TODO fix Pandas SettingWithCopyWarnings here
+
         # Get level and POS before converting Word objects (use front side)
         df["pos"] = df[self.src].apply(lambda word: word.pos.value)
         df["level"] = df[self.src].apply(lambda word: word.level)

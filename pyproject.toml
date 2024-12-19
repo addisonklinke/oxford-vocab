@@ -1,0 +1,10 @@
+[tool.mypy]
+
+# Libraries that don't have a stub package
+[[tool.mypy.overrides]]
+module = "googletrans.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sklearn.base.*"
+ignore_missing_imports = true

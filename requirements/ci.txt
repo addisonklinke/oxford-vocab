@@ -1,3 +1,6 @@
 -r pkg.txt
+mypy==1.13.0
+pandas-stubs==2.2.3.241126
 pytest==8.3.3
 pytest-mock==3.14.0
+types-PyYAML==6.0.12.20240917
