@@ -27,6 +27,11 @@ skip:
   - sufficiently [adv.]
   - ironically [adv.]
   - partially [adv.]
+  - general [adj.]
+  - best [adv.]
+  - worst [adv.]
+  - differently [adv.]
+  - intial [adj.]
   # More formal noun that doesn't have a different translation
   - racing [n.]
   - quotation [n.]
@@ -39,6 +44,11 @@ skip:
   # Same as other gendered variations
   - spokesperson [n.]
   # Not used much in English
+  - on [adv.]
+  - except [prep.]
+  - off [adv.]
+  - by [adv.]
+  - besides [prep.]
   - better [n.]
   - go [n.]
   - while [n.]
@@ -946,3 +956,27 @@ translations:
   worthwhile [adj.]: lohnenswert
   acquisition (of skills) [n.]: der Erwerb, -e
   acquisition (of a company) [n.]: die Übernahme, -n
+  refuse [v.]: verweigern
+  decline (decrease in frequency/count) [v.]: abnehmen
+  upgrade [v.]: aufrüsten
+  alert [v.]: benachrichtigen
+  every [pron.]: jeder
+  else [adv.]: sonst
+  reportedly [adv.]: den Berichten zufolge
+  supposedly [adv.]: vermeintlich
+  appropriate [adj.]: geeignet
+  enjoyably [adj.]: erfreulich
+  assume [v.]: übernehmen [übernimmt, übernahm, hat übernommen]
+  adjust (a setting) [v.]: einstellen
+  # TODO antworten -> reply, respond, answer
+  attract [v.]: locken
+  working (functioning) [adj.]: tätig
+  stop [v.]: stoppen
+  quit [v.]: kündigen
+  from (more imminently) [prep.]: aus
+  from (in the recent past) [prep.]: von
+  sufficient [adj.]: genügend
+  issue (grant) [v.]: erteilen
+  furthermore [adv.]: ferner
+  extraordinary [adv.]: außerordentlich
+  # TODO continue on ambiguous words starting with `B`
